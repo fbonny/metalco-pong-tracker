@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Player, updatePlayer, deletePlayer, getPlayers, recalculateAllStats } from '@/lib/database';
+import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
 import { compressImage } from '@/lib/imageUtils';
 import { toast } from 'sonner';
@@ -224,7 +225,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                   <div className="text-xs text-muted-foreground">Matches</div>
                 </div>
                 <div className="p-4 border-2 border-foreground text-center">
-                  <div className="text-2xl font-bold">{player.points.toFixed(1)}</div>
+                  <div className="text-2xl font-bold">{formatPoints(player.points)}</div>
                   <div className="text-xs text-muted-foreground">Points</div>
                 </div>
                 <div className="p-4 border-2 border-foreground text-center">

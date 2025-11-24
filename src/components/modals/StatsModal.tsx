@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Player, getPlayers } from '@/lib/database';
+import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
 
 interface StatsModalProps {
@@ -110,7 +111,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
                 </div>
                 
                 <div className="text-xl font-bold">
-                  {type === 'streak' ? value : value.toFixed(1)}
+                  {type === 'streak' ? value : formatPoints(value)}
                 </div>
               </div>
             ))}

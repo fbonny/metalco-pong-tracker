@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Player, getPlayers } from '@/lib/database';
+import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
 
 interface RankTabProps {
@@ -58,7 +59,7 @@ export default function RankTab({ onPlayerClick }: RankTabProps) {
               </div>
               
               <div className={`text-2xl font-bold ${isLeader ? 'text-gold' : ''}`}>
-                {player.points.toFixed(1)}
+                {formatPoints(player.points)}
               </div>
             </button>
           );
