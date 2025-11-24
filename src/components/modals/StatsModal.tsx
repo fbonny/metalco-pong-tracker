@@ -55,8 +55,8 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
 
   const titles = {
     leader: 'Re del Ranking',
-    matches: 'Most Matches',
-    streak: 'Best Win Streak',
+    matches: 'Più Partite',
+    streak: 'Miglior Striscia',
   };
 
   const icons = {

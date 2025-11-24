@@ -31,7 +31,7 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
 
   function generateTeams() {
     if (selectedPlayers.length < 4) {
-      toast.error('Please select at least 4 players');
+      toast.error('Seleziona almeno 4 giocatori');
       return;
     }
 
@@ -50,7 +50,7 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
     if (!generatedTeams) return;
     
     if (generatedTeams.teamBlu.length !== 2 || generatedTeams.teamRosso.length !== 2) {
-      toast.error('Please select exactly 4 players for a doubles match');
+      toast.error('Seleziona esattamente 4 giocatori per un doppio');
       return;
     }
     
@@ -62,12 +62,12 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Team Generator</h2>
+      <h2 className="text-2xl font-semibold mb-6">Genera Squadre</h2>
       
       {!generatedTeams ? (
         <>
           <div className="mb-6">
-            <h3 className="font-semibold mb-3">Select Players (min 4)</h3>
+            <h3 className="font-semibold mb-3">Seleziona Giocatori (min 4)</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {players.map(player => (
                 <button
@@ -91,7 +91,7 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
             disabled={selectedPlayers.length < 4}
             className="w-full py-4 bg-foreground text-background border-2 border-foreground font-semibold hover:bg-background hover:text-foreground transition-colors disabled:opacity-50"
           >
-            Generate Match ({selectedPlayers.length} selected)
+            Genera Partite ({selectedPlayers.length} selezionati)
           </button>
         </>
       ) : (
@@ -142,13 +142,13 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
               }}
               className="flex-1 py-4 border-2 border-foreground bg-background text-foreground font-semibold hover:bg-muted transition-colors"
             >
-              Generate New Teams
+              Genera Nuove Squadre
             </button>
             <button
               onClick={handleUseForMatch}
               className="flex-1 py-4 bg-foreground text-background border-2 border-foreground font-semibold hover:bg-background hover:text-foreground transition-colors"
             >
-              Use for Match
+              Usa per Partita
             </button>
           </div>
         </>

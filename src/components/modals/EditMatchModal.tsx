@@ -18,17 +18,17 @@ export default function EditMatchModal({ match, onClose, onUpdate }: EditMatchMo
     const s2 = parseInt(score2);
     
     if (isNaN(s1) || isNaN(s2)) {
-      toast.error('Please enter valid scores');
+      toast.error('Inserisci punteggi validi');
       return;
     }
     
     if (s1 === s2) {
-      toast.error('Scores cannot be tied');
+      toast.error('I punteggi non possono essere pari');
       return;
     }
     
     if (Math.max(s1, s2) < 21) {
-      toast.error('Winner must have at least 21 points');
+      toast.error('Il vincitore deve avere almeno 21 punti');
       return;
     }
 
@@ -41,11 +41,11 @@ export default function EditMatchModal({ match, onClose, onUpdate }: EditMatchMo
       
       await recalculateAllStats();
       
-      toast.success('Match updated successfully!');
+      toast.success('Partita aggiornata!');
       onUpdate();
       onClose();
     } catch (error) {
-      toast.error('Failed to update match');
+      toast.error('Errore aggiornamento partita');
       console.error(error);
     } finally {
       setLoading(false);
@@ -75,9 +75,9 @@ export default function EditMatchModal({ match, onClose, onUpdate }: EditMatchMo
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b-2 border-foreground">
           <div>
-            <h2 className="text-2xl font-semibold">Edit Match</h2>
+            <h2 className="text-2xl font-semibold">Modifica Partita</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {formatDate(match.played_at)} • {match.is_double ? 'Doubles' : 'Singles'}
+              {formatDate(match.played_at)} • {match.is_double ? 'Doppio' : 'Singolo'}
             </p>
           </div>
           <button
@@ -124,14 +124,14 @@ export default function EditMatchModal({ match, onClose, onUpdate }: EditMatchMo
               className="flex-1 py-3 border-2 border-foreground hover:bg-muted transition-colors"
               disabled={loading}
             >
-              Cancel
+              Annulla
             </button>
             <button
               onClick={handleSave}
               className="flex-1 py-3 bg-foreground text-background border-2 border-foreground hover:bg-background hover:text-foreground transition-colors"
               disabled={loading}
             >
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? 'Salvataggio...' : 'Salva Modifiche'}
             </button>
           </div>
         </div>
