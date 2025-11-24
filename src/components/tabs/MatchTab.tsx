@@ -40,45 +40,45 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
+
     const s1 = parseInt(score1);
     const s2 = parseInt(score2);
-    
+
     // Validation
     if (isNaN(s1) || isNaN(s2)) {
-      toast.error('Please enter valid scores');
+      toast.error('Inserisci punteggi validi');
       return;
     }
-    
+
     if (s1 === s2) {
-      toast.error('Scores cannot be tied');
+      toast.error('I punteggi non possono essere pari');
       return;
     }
-    
+
     if (Math.max(s1, s2) < 21) {
-      toast.error('Winner must have at least 21 points');
+      toast.error('Il vincitore deve avere almeno 21 punti');
       return;
     }
-    
-    const selectedPlayers = isDouble 
+
+    const selectedPlayers = isDouble
       ? [player1, player2, player3, player4]
       : [player1, player2];
-    
+
     if (selectedPlayers.some(p => !p)) {
-      toast.error('Please select all players');
+      toast.error('Seleziona tutti i giocatori');
       return;
     }
-    
+
     if (new Set(selectedPlayers).size !== selectedPlayers.length) {
-      toast.error('Cannot select the same player multiple times');
+      toast.error('Non puoi selezionare lo stesso giocatore più volte');
       return;
     }
-    
+
     setLoading(true);
     try {
       const team1 = isDouble ? [player1, player2] : [player1];
       const team2 = isDouble ? [player3, player4] : [player2];
-      
+
       await createMatch({
         team1,
         team2,
@@ -87,11 +87,11 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
         is_double: isDouble,
         played_at: new Date().toISOString(),
       });
-      
+
       await recalculateAllStats();
-      
-      toast.success('Match recorded successfully!');
-      
+
+      toast.success('Partita salvata!');
+
       // Reset form
       setPlayer1('');
       setPlayer2('');
@@ -99,46 +99,46 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
       setPlayer4('');
       setScore1('');
       setScore2('');
-      
+
       onMatchCreated?.();
     } catch (error) {
-      toast.error('Failed to record match');
+      toast.error('Errore nel salvataggio');
       console.error(error);
     } finally {
       setLoading(false);
     }
   }
 
-  const availablePlayers = players.filter(p => 
-    !isDouble 
+  const availablePlayers = players.filter(p =>
+    !isDouble
       ? ![player1, player2].includes(p.name)
       : ![player1, player2, player3, player4].includes(p.name)
   );
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Record Match</h2>
-      
+      <h2 className="text-2xl font-semibold mb-6">Nuova Partita</h2>
+
       <div className="mb-6 flex gap-2">
         <button
           onClick={() => setIsDouble(false)}
           className={`flex-1 py-3 border-2 transition-colors ${
-            !isDouble 
-              ? 'bg-foreground text-background border-foreground' 
+            !isDouble
+              ? 'bg-foreground text-background border-foreground'
               : 'bg-background text-foreground border-foreground hover:bg-muted'
           }`}
         >
-          Singles
+          Singolo
         </button>
         <button
           onClick={() => setIsDouble(true)}
           className={`flex-1 py-3 border-2 transition-colors ${
-            isDouble 
-              ? 'bg-foreground text-background border-foreground' 
+            isDouble
+              ? 'bg-foreground text-background border-foreground'
               : 'bg-background text-foreground border-foreground hover:bg-muted'
           }`}
         >
-          Doubles
+          Doppio
         </button>
       </div>
 
@@ -146,7 +146,7 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Team 1 */}
           <div className="border-2 border-foreground p-4">
-            <h3 className="font-semibold mb-3">Team 1</h3>
+            <h3 className="font-semibold mb-3">Squadra 1</h3>
             <div className="space-y-3">
               <select
                 value={player1}
@@ -154,12 +154,16 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
                 className="w-full p-3 border-2 border-foreground bg-background"
                 required
               >
-                <option value="">Select Player 1</option>
-                {players.filter(p => ![player2, player3, player4].includes(p.name)).map(p => (
-                  <option key={p.id} value={p.name}>{p.name}</option>
-                ))}
+                <option value="">Seleziona Giocatore 1</option>
+                {players
+                  .filter(p => ![player2, player3, player4].includes(p.name))
+                  .map(p => (
+                    <option key={p.id} value={p.name}>
+                      {p.name}
+                    </option>
+                  ))}
               </select>
-              
+
               {isDouble && (
                 <select
                   value={player2}
@@ -167,18 +171,22 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
                   className="w-full p-3 border-2 border-foreground bg-background"
                   required
                 >
-                  <option value="">Select Player 2</option>
-                  {players.filter(p => ![player1, player3, player4].includes(p.name)).map(p => (
-                    <option key={p.id} value={p.name}>{p.name}</option>
-                  ))}
+                  <option value="">Seleziona Giocatore 2</option>
+                  {players
+                    .filter(p => ![player1, player3, player4].includes(p.name))
+                    .map(p => (
+                      <option key={p.id} value={p.name}>
+                        {p.name}
+                      </option>
+                    ))}
                 </select>
               )}
-              
+
               <input
                 type="number"
                 value={score1}
                 onChange={(e) => setScore1(e.target.value)}
-                placeholder="Score"
+                placeholder="Punti"
                 className="w-full p-3 border-2 border-foreground bg-background"
                 min="0"
                 required
@@ -188,24 +196,32 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
 
           {/* Team 2 */}
           <div className="border-2 border-foreground p-4">
-            <h3 className="font-semibold mb-3">Team 2</h3>
+            <h3 className="font-semibold mb-3">Squadra 2</h3>
             <div className="space-y-3">
               <select
                 value={isDouble ? player3 : player2}
-                onChange={(e) => isDouble ? setPlayer3(e.target.value) : setPlayer2(e.target.value)}
+                onChange={(e) =>
+                  isDouble ? setPlayer3(e.target.value) : setPlayer2(e.target.value)
+                }
                 className="w-full p-3 border-2 border-foreground bg-background"
                 required
               >
-                <option value="">Select Player {isDouble ? '3' : '2'}</option>
-                {players.filter(p => 
-                  isDouble 
-                    ? ![player1, player2, player4].includes(p.name)
-                    : ![player1].includes(p.name)
-                ).map(p => (
-                  <option key={p.id} value={p.name}>{p.name}</option>
-                ))}
+                <option value="">
+                  Seleziona Giocatore {isDouble ? '3' : '2'}
+                </option>
+                {players
+                  .filter(p =>
+                    isDouble
+                      ? ![player1, player2, player4].includes(p.name)
+                      : ![player1].includes(p.name)
+                  )
+                  .map(p => (
+                    <option key={p.id} value={p.name}>
+                      {p.name}
+                    </option>
+                  ))}
               </select>
-              
+
               {isDouble && (
                 <select
                   value={player4}
@@ -213,18 +229,22 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
                   className="w-full p-3 border-2 border-foreground bg-background"
                   required
                 >
-                  <option value="">Select Player 4</option>
-                  {players.filter(p => ![player1, player2, player3].includes(p.name)).map(p => (
-                    <option key={p.id} value={p.name}>{p.name}</option>
-                  ))}
+                  <option value="">Seleziona Giocatore 4</option>
+                  {players
+                    .filter(p => ![player1, player2, player3].includes(p.name))
+                    .map(p => (
+                      <option key={p.id} value={p.name}>
+                        {p.name}
+                      </option>
+                    ))}
                 </select>
               )}
-              
+
               <input
                 type="number"
                 value={score2}
                 onChange={(e) => setScore2(e.target.value)}
-                placeholder="Score"
+                placeholder="Punti"
                 className="w-full p-3 border-2 border-foreground bg-background"
                 min="0"
                 required
@@ -238,7 +258,7 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
           disabled={loading}
           className="w-full py-4 bg-foreground text-background border-2 border-foreground font-semibold hover:bg-background hover:text-foreground transition-colors disabled:opacity-50"
         >
-          {loading ? 'Recording...' : 'Record Match'}
+          {loading ? 'Salvataggio...' : 'Salva Risultato'}
         </button>
       </form>
     </div>

@@ -23,16 +23,16 @@ export default function NuovoTab({ onPlayerCreated }: NuovoTabProps) {
       const compressed = await compressImage(file);
       setAvatar(compressed);
     } catch (error) {
-      toast.error('Failed to process image');
+      toast.error('Errore elaborazione immagine');
       console.error(error);
     }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
+
     if (!name.trim()) {
-      toast.error('Please enter a name');
+      toast.error('Inserisci un nome');
       return;
     }
 
@@ -44,18 +44,18 @@ export default function NuovoTab({ onPlayerCreated }: NuovoTabProps) {
         hand,
         shot,
       });
-      
-      toast.success('Player created successfully!');
-      
+
+      toast.success('Giocatore creato!');
+
       // Reset form
       setName('');
       setAvatar('');
       setHand('N.D.');
       setShot('N.D.');
-      
+
       onPlayerCreated();
     } catch (error) {
-      toast.error('Failed to create player');
+      toast.error('Errore creazione giocatore');
       console.error(error);
     } finally {
       setLoading(false);
@@ -64,24 +64,24 @@ export default function NuovoTab({ onPlayerCreated }: NuovoTabProps) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Add New Player</h2>
-      
+      <h2 className="text-2xl font-semibold mb-6">Nuovo Giocatore</h2>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Avatar Preview */}
         {(avatar || name) && (
           <div className="flex justify-center">
-            <PlayerAvatar name={name || 'Player'} avatar={avatar} size="lg" />
+            <PlayerAvatar name={name || 'Giocatore'} avatar={avatar} size="lg" />
           </div>
         )}
 
         {/* Name */}
         <div>
-          <label className="block font-semibold mb-2">Name *</label>
+          <label className="block font-semibold mb-2">Nome *</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Enter player name"
+            placeholder="Inserisci nome giocatore"
             className="w-full p-3 border-2 border-foreground bg-background"
             required
           />
@@ -97,13 +97,13 @@ export default function NuovoTab({ onPlayerCreated }: NuovoTabProps) {
             className="w-full p-3 border-2 border-foreground bg-background"
           />
           <p className="text-xs text-muted-foreground mt-1">
-            Image will be compressed and resized automatically
+            L'immagine verrà compressa e ridimensionata automaticamente
           </p>
         </div>
 
         {/* Hand */}
         <div>
-          <label className="block font-semibold mb-2">Hand</label>
+          <label className="block font-semibold mb-2">Mano</label>
           <div className="grid grid-cols-3 gap-2">
             {['Destrorso', 'Mancino', 'N.D.'].map(option => (
               <button
@@ -124,7 +124,7 @@ export default function NuovoTab({ onPlayerCreated }: NuovoTabProps) {
 
         {/* Shot */}
         <div>
-          <label className="block font-semibold mb-2">Shot</label>
+          <label className="block font-semibold mb-2">Colpo</label>
           <div className="grid grid-cols-3 gap-2">
             {['Dritto', 'Rovescio', 'N.D.'].map(option => (
               <button
@@ -148,7 +148,7 @@ export default function NuovoTab({ onPlayerCreated }: NuovoTabProps) {
           disabled={loading}
           className="w-full py-4 bg-foreground text-background border-2 border-foreground font-semibold hover:bg-background hover:text-foreground transition-colors disabled:opacity-50"
         >
-          {loading ? 'Creating...' : 'Create Player'}
+          {loading ? 'Creazione...' : 'Crea Giocatore'}
         </button>
       </form>
     </div>

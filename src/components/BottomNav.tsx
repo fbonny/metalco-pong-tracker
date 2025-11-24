@@ -4,9 +4,9 @@ interface BottomNavProps {
 }
 
 const tabs = [
-  { id: 'match', label: 'Match', icon: 'sports_tennis' },
-  { id: 'rank', label: 'Rank', icon: 'leaderboard' },
-  { id: 'team', label: 'Team', icon: 'groups' },
+  { id: 'match', label: 'Partita', icon: 'sports_tennis' },
+  { id: 'rank', label: 'Classifica', icon: 'leaderboard' },
+  { id: 'team', label: 'Squadre', icon: 'groups' },
   { id: 'storico', label: 'Storico', icon: 'history' },
   { id: 'nuovo', label: 'Nuovo', icon: 'person_add' },
   { id: 'info', label: 'Info', icon: 'info' },

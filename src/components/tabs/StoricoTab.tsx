@@ -25,15 +25,15 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
   }
 
   async function handleDelete(matchId: string) {
-    if (!confirm('Delete this match? Player stats will be recalculated.')) return;
+    if (!confirm('Eliminare questa partita? Le statistiche verranno ricalcolate.')) return;
     
     try {
       await deleteMatch(matchId);
       await recalculateAllStats();
       await loadMatches();
-      toast.success('Match deleted');
+      toast.success('Partita eliminata');
     } catch (error) {
-      toast.error('Failed to delete match');
+      toast.error('Errore eliminazione partita');
       console.error(error);
     }
   }
@@ -58,7 +58,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Match History</h2>
+      <h2 className="text-2xl font-semibold mb-6">Storico Partite</h2>
       
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-3 mb-6">
@@ -69,7 +69,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
           <div className="text-xs text-muted-foreground mb-1">Re del Ranking</div>
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-gold">emoji_events</span>
-            <span className="text-sm font-medium">View Stats</span>
+            <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
         
@@ -77,7 +77,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
           onClick={() => onStatsClick('matches')}
           className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
         >
-          <div className="text-xs text-muted-foreground mb-1">Totale Match</div>
+          <div className="text-xs text-muted-foreground mb-1">Totale Partite</div>
           <div className="text-2xl font-bold">{stats.totalMatches}</div>
         </button>
         
@@ -85,10 +85,10 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
           onClick={() => onStatsClick('streak')}
           className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
         >
-          <div className="text-xs text-muted-foreground mb-1">Best Streak</div>
+          <div className="text-xs text-muted-foreground mb-1">Miglior Striscia</div>
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined">local_fire_department</span>
-            <span className="text-sm font-medium">View Stats</span>
+            <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
       </div>
@@ -99,7 +99,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by player name..."
+          placeholder="Cerca per nome giocatore..."
           className="w-full p-3 border-2 border-foreground bg-background"
         />
       </div>
@@ -117,7 +117,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="text-xs text-muted-foreground mb-2">
-                    {formatDate(match.played_at)} • {match.is_double ? 'Doubles' : 'Singles'}
+                    {formatDate(match.played_at)} • {match.is_double ? 'Doppio' : 'Singolo'}
                   </div>
                   
                   <div className="flex items-center gap-3">
@@ -143,14 +143,14 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
                   <button
                     onClick={() => onEditMatch(match)}
                     className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors"
-                    title="Edit"
+                    title="Modifica"
                   >
                     <span className="material-symbols-outlined text-lg">edit</span>
                   </button>
                   <button
                     onClick={() => handleDelete(match.id)}
                     className="p-2 border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                    title="Delete"
+                    title="Elimina"
                   >
                     <span className="material-symbols-outlined text-lg">delete</span>
                   </button>

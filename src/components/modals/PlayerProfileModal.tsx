@@ -52,14 +52,14 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
       const compressed = await compressImage(file);
       setAvatar(compressed);
     } catch (error) {
-      toast.error('Failed to process image');
+      toast.error('Errore elaborazione immagine');
       console.error(error);
     }
   }
 
   async function handleSave() {
     if (!name.trim()) {
-      toast.error('Name cannot be empty');
+      toast.error('Il nome non può essere vuoto');
       return;
     }
 
@@ -73,11 +73,11 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
         updated_at: new Date().toISOString(),
       });
       
-      toast.success('Player updated successfully!');
+      toast.success('Profilo aggiornato!');
       setIsEditing(false);
       onUpdate();
     } catch (error) {
-      toast.error('Failed to update player');
+      toast.error('Errore aggiornamento profilo');
       console.error(error);
     } finally {
       setLoading(false);
@@ -85,17 +85,17 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   }
 
   async function handleDelete() {
-    if (!confirm(`Delete ${player.name}? This will also remove all their match history.`)) return;
+    if (!confirm(`Eliminare ${player.name}? Verranno rimossi anche tutti i suoi match dallo storico.`)) return;
 
     setLoading(true);
     try {
       await deletePlayer(player.id);
       await recalculateAllStats();
-      toast.success('Player deleted');
+      toast.success('Giocatore eliminato');
       onClose();
       onUpdate();
     } catch (error) {
-      toast.error('Failed to delete player');
+      toast.error('Errore eliminazione giocatore');
       console.error(error);
     } finally {
       setLoading(false);
@@ -113,7 +113,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b-2 border-foreground">
-          <h2 className="text-2xl font-semibold">Player Profile</h2>
+          <h2 className="text-2xl font-semibold">Profilo Giocatore</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-muted transition-colors"
@@ -134,7 +134,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full p-3 border-2 border-foreground bg-background text-center text-xl font-semibold"
-                  placeholder="Player name"
+                  placeholder="Nome giocatore"
                 />
                 
                 <input
@@ -153,7 +153,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
           {isEditing ? (
             <div className="space-y-4">
               <div>
-                <label className="block font-semibold mb-2">Hand</label>
+                <label className="block font-semibold mb-2">Mano</label>
                 <div className="grid grid-cols-3 gap-2">
                   {['Destrorso', 'Mancino', 'N.D.'].map(option => (
                     <button
@@ -173,7 +173,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
               </div>
 
               <div>
-                <label className="block font-semibold mb-2">Shot</label>
+                <label className="block font-semibold mb-2">Colpo</label>
                 <div className="grid grid-cols-3 gap-2">
                   {['Dritto', 'Rovescio', 'N.D.'].map(option => (
                     <button
@@ -195,11 +195,11 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 border-2 border-foreground">
-                <div className="text-xs text-muted-foreground">Hand</div>
+                <div className="text-xs text-muted-foreground">Mano</div>
                 <div className="font-semibold">{player.hand}</div>
               </div>
               <div className="p-3 border-2 border-foreground">
-                <div className="text-xs text-muted-foreground">Shot</div>
+                <div className="text-xs text-muted-foreground">Colpo</div>
                 <div className="font-semibold">{player.shot}</div>
               </div>
             </div>
@@ -210,11 +210,11 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
             <>
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-4 border-2 border-foreground">
-                  <div className="text-xs text-muted-foreground mb-1">Current Rank</div>
+                  <div className="text-xs text-muted-foreground mb-1">Classifica Attuale</div>
                   <div className="text-3xl font-bold">#{currentRank}</div>
                 </div>
                 <div className="p-4 border-2 border-foreground">
-                  <div className="text-xs text-muted-foreground mb-1">Best Rank</div>
+                  <div className="text-xs text-muted-foreground mb-1">Miglior Classifica</div>
                   <div className="text-3xl font-bold">#{player.best_rank || currentRank}</div>
                 </div>
               </div>
@@ -222,22 +222,22 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
               <div className="grid grid-cols-3 gap-3">
                 <div className="p-4 border-2 border-foreground text-center">
                   <div className="text-2xl font-bold">{matchesPlayed}</div>
-                  <div className="text-xs text-muted-foreground">Matches</div>
+                  <div className="text-xs text-muted-foreground">Partite</div>
                 </div>
                 <div className="p-4 border-2 border-foreground text-center">
                   <div className="text-2xl font-bold">{formatPoints(player.points)}</div>
-                  <div className="text-xs text-muted-foreground">Points</div>
+                  <div className="text-xs text-muted-foreground">Punti</div>
                 </div>
                 <div className="p-4 border-2 border-foreground text-center">
                   <div className="text-2xl font-bold">{getCurrentStreak()}</div>
-                  <div className="text-xs text-muted-foreground">Streak</div>
+                  <div className="text-xs text-muted-foreground">Striscia</div>
                 </div>
               </div>
 
               {/* Win Rate */}
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm font-semibold">Win Rate</span>
+                  <span className="text-sm font-semibold">% Vittorie</span>
                   <span className="text-sm font-semibold">{winRate.toFixed(1)}%</span>
                 </div>
                 <div className="w-full h-4 border-2 border-foreground">
@@ -247,8 +247,8 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                   />
                 </div>
                 <div className="flex justify-between mt-1 text-xs text-muted-foreground">
-                  <span>{player.wins}W</span>
-                  <span>{player.losses}L</span>
+                  <span>{player.wins}V</span>
+                  <span>{player.losses}S</span>
                 </div>
               </div>
             </>
@@ -263,14 +263,14 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                   className="flex-1 py-3 border-2 border-foreground hover:bg-muted transition-colors"
                   disabled={loading}
                 >
-                  Cancel
+                  Annulla
                 </button>
                 <button
                   onClick={handleSave}
                   className="flex-1 py-3 bg-foreground text-background border-2 border-foreground hover:bg-background hover:text-foreground transition-colors"
                   disabled={loading}
                 >
-                  {loading ? 'Saving...' : 'Save Changes'}
+                  {loading ? 'Salvataggio...' : 'Salva Modifiche'}
                 </button>
               </>
             ) : (
@@ -280,13 +280,13 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                   className="py-3 px-6 border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
                   disabled={loading}
                 >
-                  Delete
+                  Elimina
                 </button>
                 <button
                   onClick={() => setIsEditing(true)}
                   className="flex-1 py-3 bg-foreground text-background border-2 border-foreground hover:bg-background hover:text-foreground transition-colors"
                 >
-                  Edit Profile
+                  Modifica Profilo
                 </button>
               </>
             )}
