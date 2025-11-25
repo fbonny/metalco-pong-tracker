@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Player, getPlayers, Match, getMatches, calculateMatchPoints } from '@/lib/database';
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
+import { Trophy, Target, Flame, TrendingUp, TrendingDown, TrendingUpDown, X } from 'lucide-react';
 
 interface StatsModalProps {
-  type: 'leader' | 'matches' | 'streak' | 'lossStreak' | 'winRate' | 'lossRate' | 'topFlop';
+  type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks';
   onClose: () => void;
 }
 
@@ -44,7 +45,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
   }
 
   function getTopPlayers() {
-    if (type === 'streak') {
+    if (type === 'winStreak') {
       // Only count consecutive WINS from the end
       return players
         .map(p => {
@@ -100,7 +101,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
         .slice(0, 5);
     }
 
-    if (type === 'topFlop') {
+    if (type === 'twoWeeks') {
       // Top 5 and Bottom 5 for last 14 days
       const withRecentPoints = players
         .map(p => ({ player: p, value: calculateRecentPoints(p.name) }))
@@ -124,31 +125,31 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
   const titles = {
     leader: 'Re del Ranking',
     matches: 'Più Partite',
-    streak: 'Miglior Striscia',
+    winStreak: 'Miglior Striscia',
     lossStreak: 'Peggior Striscia',
     winRate: 'Miglior % Vittorie',
     lossRate: 'Peggior % Sconfitte',
-    topFlop: 'Top e Flop - 14gg',
+    twoWeeks: 'Top e Flop - 14gg',
   };
 
-  const icons = {
-    leader: 'emoji_events',
-    matches: 'sports_tennis',
-    streak: 'local_fire_department',
-    lossStreak: 'local_fire_department',
-    winRate: 'trending_up',
-    lossRate: 'trending_down',
-    topFlop: 'show_chart',
-  };
+  const IconComponent = {
+    leader: Trophy,
+    matches: Target,
+    winStreak: Flame,
+    lossStreak: Flame,
+    winRate: TrendingUp,
+    lossRate: TrendingDown,
+    twoWeeks: TrendingUpDown,
+  }[type];
 
   function formatValue(value: number, playerIndex: number) {
     if (type === 'winRate' || type === 'lossRate') {
       return `${value.toFixed(1)}%`;
     }
-    if (type === 'topFlop') {
+    if (type === 'twoWeeks') {
       return value > 0 ? `+${formatPoints(value)}` : formatPoints(value);
     }
-    if (type === 'streak' || type === 'lossStreak') {
+    if (type === 'winStreak' || type === 'lossStreak') {
       return value.toString();
     }
     return formatPoints(value);
@@ -166,21 +167,21 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b-2 border-foreground">
           <div className="flex items-center gap-3">
-            <span className={`material-symbols-outlined text-2xl ${type === 'lossStreak' || type === 'lossRate' ? 'text-destructive' : ''}`}>
-              {icons[type]}
-            </span>
+            <IconComponent 
+              className={`w-6 h-6 ${type === 'lossStreak' || type === 'lossRate' ? 'text-destructive' : type === 'winRate' ? 'text-green-500' : ''}`}
+            />
             <h2 className="text-2xl font-semibold">{titles[type]}</h2>
           </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-muted transition-colors"
           >
-            <span className="material-symbols-outlined">close</span>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-6">
-          {type === 'topFlop' && (
+          {type === 'twoWeeks' && (
             <div className="mb-4 grid grid-cols-2 gap-3 text-sm">
               <div className="p-3 border-2 border-green-500 bg-green-500/10 text-center">
                 <div className="font-bold">🔥 TOP 5</div>
@@ -193,23 +194,23 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
           
           <div className="space-y-3">
             {topPlayers.map(({ player, value }, index) => {
-              const isTopSection = type === 'topFlop' && index < 5;
-              const isFlopSection = type === 'topFlop' && index >= 5;
+              const isTopSection = type === 'twoWeeks' && index < 5;
+              const isFlopSection = type === 'twoWeeks' && index >= 5;
               
               return (
                 <div
                   key={`${player.id}-${index}`}
                   className={`flex items-center gap-4 p-4 border-2 ${
-                    index === 0 && type !== 'topFlop' ? 'border-gold bg-gold/10' : 
+                    index === 0 && type !== 'twoWeeks' ? 'border-gold bg-gold/10' : 
                     isTopSection ? 'border-green-500 bg-green-500/5' :
                     isFlopSection ? 'border-destructive bg-destructive/5' :
                     'border-foreground'
                   }`}
                 >
                   <div className={`text-2xl font-bold w-8 ${
-                    index === 0 && type !== 'topFlop' ? 'text-gold' : ''
+                    index === 0 && type !== 'twoWeeks' ? 'text-gold' : ''
                   }`}>
-                    {type === 'topFlop' ? (index < 5 ? index + 1 : index - 4) : index + 1}
+                    {type === 'twoWeeks' ? (index < 5 ? index + 1 : index - 4) : index + 1}
                   </div>
                   
                   <PlayerAvatar name={player.name} avatar={player.avatar} size="sm" />
@@ -222,8 +223,8 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
                   </div>
                   
                   <div className={`text-xl font-bold ${
-                    type === 'topFlop' && value < 0 ? 'text-destructive' : 
-                    type === 'topFlop' && value > 0 ? 'text-green-500' : ''
+                    type === 'twoWeeks' && value < 0 ? 'text-destructive' : 
+                    type === 'twoWeeks' && value > 0 ? 'text-green-500' : ''
                   }`}>
                     {formatValue(value, index)}
                   </div>

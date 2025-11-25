@@ -3,6 +3,7 @@ import { Player, updatePlayer, deletePlayer, getPlayers, recalculateAllStats } f
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
 import { compressImage } from '@/lib/imageUtils';
+import { X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PlayerProfileModalProps {
@@ -20,6 +21,11 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   const [loading, setLoading] = useState(false);
   const [showExpandedAvatar, setShowExpandedAvatar] = useState(false);
 
+  // ... rest of the state and functions remain the same ...
+
+  const matchesPlayed = player.wins + player.losses;
+  const winRate = matchesPlayed > 0 ? (player.wins / matchesPlayed) * 100 : 0;
+
   // Calculate current rank
   const [currentRank, setCurrentRank] = useState(0);
   useState(() => {
@@ -28,9 +34,6 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
       setCurrentRank(rank);
     });
   });
-
-  const matchesPlayed = player.wins + player.losses;
-  const winRate = matchesPlayed > 0 ? (player.wins / matchesPlayed) * 100 : 0;
 
   // Calculate current streak (only W or only L)
   const getCurrentStreak = () => {
@@ -120,7 +123,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
               onClick={onClose}
               className="p-2 hover:bg-muted transition-colors"
             >
-              <span className="material-symbols-outlined">close</span>
+              <X className="w-5 h-5" />
             </button>
           </div>
 
@@ -316,7 +319,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
             onClick={() => setShowExpandedAvatar(false)}
             className="absolute top-4 right-4 p-3 text-white hover:bg-white/10 transition-colors rounded-full"
           >
-            <span className="material-symbols-outlined text-3xl">close</span>
+            <X className="w-8 h-8" />
           </button>
           <img 
             src={avatar} 
