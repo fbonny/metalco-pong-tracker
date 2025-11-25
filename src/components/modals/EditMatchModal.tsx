@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Match, updateMatch, recalculateAllStats } from '@/lib/database';
+import { X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface EditMatchModalProps {
@@ -84,7 +85,7 @@ export default function EditMatchModal({ match, onClose, onUpdate }: EditMatchMo
             onClick={onClose}
             className="p-2 hover:bg-muted transition-colors"
           >
-            <span className="material-symbols-outlined">close</span>
+            <X className="w-5 h-5" />
           </button>
         </div>
 

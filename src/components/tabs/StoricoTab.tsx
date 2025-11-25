@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Match, getMatches, deleteMatch, recalculateAllStats } from '@/lib/database';
+import { Match, getMatches, deleteMatch, recalculateAllStats, Player, getPlayers } from '@/lib/database';
+import { Trophy, Flame, TrendingUp, TrendingDown, TrendingUpDown, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StoricoTabProps {
@@ -61,14 +62,14 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
       <h2 className="text-2xl font-semibold mb-6">Storico Partite</h2>
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-3 gap-3 mb-6">
         <button
           onClick={() => onStatsClick('leader')}
           className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
         >
           <div className="text-xs text-muted-foreground mb-1">Re del Ranking</div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-gold">emoji_events</span>
+            <Trophy className="w-5 h-5 text-gold" />
             <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
@@ -87,7 +88,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         >
           <div className="text-xs text-muted-foreground mb-1">Miglior Striscia</div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-green-500">local_fire_department</span>
+            <Flame className="w-5 h-5 text-green-500" />
             <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
@@ -98,7 +99,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         >
           <div className="text-xs text-muted-foreground mb-1">Peggior Striscia</div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-destructive">local_fire_department</span>
+            <Flame className="w-5 h-5 text-destructive" />
             <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
@@ -109,7 +110,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         >
           <div className="text-xs text-muted-foreground mb-1">Miglior % Vittorie</div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-green-500">trending_up</span>
+            <TrendingUp className="w-5 h-5 text-green-500" />
             <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
@@ -120,18 +121,18 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         >
           <div className="text-xs text-muted-foreground mb-1">Peggior % Sconfitte</div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-destructive">trending_down</span>
+            <TrendingDown className="w-5 h-5 text-destructive" />
             <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
 
         <button
           onClick={() => onStatsClick('topFlop')}
-          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left col-span-2 md:col-span-3"
+          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left col-span-3"
         >
           <div className="text-xs text-muted-foreground mb-1">Top e Flop - 14gg</div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined">show_chart</span>
+            <TrendingUpDown className="w-5 h-5" />
             <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
@@ -189,14 +190,14 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
                     className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors"
                     title="Modifica"
                   >
-                    <span className="material-symbols-outlined text-lg">edit</span>
+                    <Edit className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(match.id)}
                     className="p-2 border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
                     title="Elimina"
                   >
-                    <span className="material-symbols-outlined text-lg">delete</span>
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
