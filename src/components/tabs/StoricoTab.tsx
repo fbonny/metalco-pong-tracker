@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 interface StoricoTabProps {
   onEditMatch: (match: Match) => void;
-  onStatsClick: (type: 'leader' | 'matches' | 'streak') => void;
+  onStatsClick: (type: 'leader' | 'matches' | 'streak' | 'lossStreak' | 'winRate' | 'lossRate' | 'topFlop') => void;
 }
 
 export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProps) {
@@ -61,7 +61,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
       <h2 className="text-2xl font-semibold mb-6">Storico Partite</h2>
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
         <button
           onClick={() => onStatsClick('leader')}
           className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
@@ -87,7 +87,51 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         >
           <div className="text-xs text-muted-foreground mb-1">Miglior Striscia</div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined">local_fire_department</span>
+            <span className="material-symbols-outlined text-green-500">local_fire_department</span>
+            <span className="text-sm font-medium">Vedi Stats</span>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onStatsClick('lossStreak')}
+          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
+        >
+          <div className="text-xs text-muted-foreground mb-1">Peggior Striscia</div>
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-destructive">local_fire_department</span>
+            <span className="text-sm font-medium">Vedi Stats</span>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onStatsClick('winRate')}
+          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
+        >
+          <div className="text-xs text-muted-foreground mb-1">Miglior % Vittorie</div>
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-green-500">trending_up</span>
+            <span className="text-sm font-medium">Vedi Stats</span>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onStatsClick('lossRate')}
+          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
+        >
+          <div className="text-xs text-muted-foreground mb-1">Peggior % Sconfitte</div>
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-destructive">trending_down</span>
+            <span className="text-sm font-medium">Vedi Stats</span>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onStatsClick('topFlop')}
+          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left col-span-2 md:col-span-3"
+        >
+          <div className="text-xs text-muted-foreground mb-1">Top e Flop - 14gg</div>
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined">show_chart</span>
             <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
