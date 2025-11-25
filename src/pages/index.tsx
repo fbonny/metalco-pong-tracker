@@ -20,7 +20,7 @@ export default function Home() {
   // Modal states
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
-  const [statsType, setStatsType] = useState<'leader' | 'matches' | 'streak' | null>(null);
+  const [statsType, setStatsType] = useState<'leader' | 'matches' | 'streak' | 'lossStreak' | 'winRate' | 'lossRate' | 'topFlop' | null>(null);
   
   // Team generator prefill
   const [teamsPrefill, setTeamsPrefill] = useState<{ team1: string[]; team2: string[] } | undefined>();

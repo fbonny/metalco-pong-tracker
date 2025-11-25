@@ -27,6 +27,7 @@ export default function RankTab({ onPlayerClick }: RankTabProps) {
         {players.map((player, index) => {
           const rank = index + 1;
           const isLeader = rank === 1;
+          const last5 = player.history.slice(-5);
           
           return (
             <button
@@ -56,6 +57,20 @@ export default function RankTab({ onPlayerClick }: RankTabProps) {
                 <div className="text-sm text-muted-foreground">
                   {player.wins}V - {player.losses}S
                 </div>
+                {/* Last 5 matches indicators */}
+                {last5.length > 0 && (
+                  <div className="flex gap-1 mt-2">
+                    {last5.map((result, i) => (
+                      <div
+                        key={i}
+                        className={`w-2 h-2 rounded-full ${
+                          result === 'W' ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                        title={result === 'W' ? 'Vittoria' : 'Sconfitta'}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
               
               <div className={`text-2xl font-bold ${isLeader ? 'text-gold' : ''}`}>
