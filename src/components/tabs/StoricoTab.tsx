@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 interface StoricoTabProps {
   onEditMatch: (match: Match) => void;
-  onStatsClick: (type: 'leader' | 'matches' | 'streak' | 'lossStreak' | 'winRate' | 'lossRate' | 'topFlop') => void;
+  onStatsClick: (type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks') => void;
 }
 
 export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProps) {
@@ -83,7 +83,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         </button>
         
         <button
-          onClick={() => onStatsClick('streak')}
+          onClick={() => onStatsClick('winStreak')}
           className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
         >
           <div className="text-xs text-muted-foreground mb-1">Miglior Striscia</div>
@@ -127,7 +127,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         </button>
 
         <button
-          onClick={() => onStatsClick('topFlop')}
+          onClick={() => onStatsClick('twoWeeks')}
           className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left col-span-3"
         >
           <div className="text-xs text-muted-foreground mb-1">Top e Flop - 14gg</div>
