@@ -44,35 +44,54 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
     return points;
   }
 
+  function calculateMaxStreak(history: string[], targetResult: 'W' | 'L'): number {
+    let maxStreak = 0;
+    let currentStreak = 0;
+    
+    for (const result of history) {
+      if (result === targetResult) {
+        currentStreak++;
+        maxStreak = Math.max(maxStreak, currentStreak);
+      } else {
+        currentStreak = 0;
+      }
+    }
+    
+    return maxStreak;
+  }
+
   function getTopPlayers() {
     if (type === 'winStreak') {
-      // Only count consecutive WINS from the end
+      // Calculate MAXIMUM consecutive WINS across entire history
       return players
-        .map(p => {
-          let streak = 0;
-          for (let i = p.history.length - 1; i >= 0; i--) {
-            if (p.history[i] === 'W') streak++;
-            else break;
-          }
-          return { player: p, value: streak };
-        })
+        .map(p => ({
+          player: p,
+          value: calculateMaxStreak(p.history, 'W')
+        }))
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
     }
 
     if (type === 'lossStreak') {
-      // Only count consecutive LOSSES from the end
+      // Calculate MAXIMUM consecutive LOSSES across entire history
       return players
-        .map(p => {
-          let streak = 0;
-          for (let i = p.history.length - 1; i >= 0; i--) {
-            if (p.history[i] === 'L') streak++;
-            else break;
-          }
-          return { player: p, value: streak };
-        })
+        .map(p => ({
+          player: p,
+          value: calculateMaxStreak(p.history, 'L')
+        }))
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
+    }
+
+    if (type === 'matches') {
+      // Order by total number of matches played
+      return players
+        .map(p => ({
+          player: p,
+          value: p.wins + p.losses
+        }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 10);
     }
 
     if (type === 'winRate') {
@@ -102,14 +121,25 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
     }
 
     if (type === 'twoWeeks') {
-      // Top 5 and Bottom 5 for last 14 days
+      // Calculate points gained in last 14 days for each player
       const withRecentPoints = players
-        .map(p => ({ player: p, value: calculateRecentPoints(p.name) }))
+        .map(p => ({ 
+          player: p, 
+          value: calculateRecentPoints(p.name) 
+        }))
+        .filter(p => p.value !== 0) // Only show players who played in last 14 days
         .sort((a, b) => b.value - a.value);
       
+      if (withRecentPoints.length === 0) {
+        return [];
+      }
+      
       // Get top 5 and bottom 5
-      const top5 = withRecentPoints.slice(0, 5);
-      const bottom5 = withRecentPoints.slice(-5).reverse();
+      const numPlayers = Math.min(5, withRecentPoints.length);
+      const top5 = withRecentPoints.slice(0, numPlayers);
+      const bottom5 = withRecentPoints.length > 5 
+        ? withRecentPoints.slice(-numPlayers).reverse()
+        : [];
       
       return [...top5, ...bottom5];
     }
@@ -149,7 +179,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
     if (type === 'twoWeeks') {
       return value > 0 ? `+${formatPoints(value)}` : formatPoints(value);
     }
-    if (type === 'winStreak' || type === 'lossStreak') {
+    if (type === 'winStreak' || type === 'lossStreak' || type === 'matches') {
       return value.toString();
     }
     return formatPoints(value);
@@ -168,7 +198,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
         <div className="flex items-center justify-between p-6 border-b-2 border-foreground">
           <div className="flex items-center gap-3">
             <IconComponent 
-              className={`w-6 h-6 ${type === 'lossStreak' || type === 'lossRate' ? 'text-destructive' : type === 'winRate' ? 'text-green-500' : ''}`}
+              className={`w-6 h-6 ${type === 'lossStreak' || type === 'lossRate' ? 'text-destructive' : type === 'winRate' || type === 'winStreak' ? 'text-green-500' : ''}`}
             />
             <h2 className="text-2xl font-semibold">{titles[type]}</h2>
           </div>
@@ -181,57 +211,65 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
         </div>
 
         <div className="p-6">
-          {type === 'twoWeeks' && (
-            <div className="mb-4 grid grid-cols-2 gap-3 text-sm">
-              <div className="p-3 border-2 border-green-500 bg-green-500/10 text-center">
-                <div className="font-bold">🔥 TOP 5</div>
-              </div>
-              <div className="p-3 border-2 border-destructive bg-destructive/10 text-center">
-                <div className="font-bold">💧 FLOP 5</div>
-              </div>
+          {topPlayers.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">
+              Nessun dato disponibile per questo periodo
             </div>
-          )}
-          
-          <div className="space-y-3">
-            {topPlayers.map(({ player, value }, index) => {
-              const isTopSection = type === 'twoWeeks' && index < 5;
-              const isFlopSection = type === 'twoWeeks' && index >= 5;
-              
-              return (
-                <div
-                  key={`${player.id}-${index}`}
-                  className={`flex items-center gap-4 p-4 border-2 ${
-                    index === 0 && type !== 'twoWeeks' ? 'border-gold bg-gold/10' : 
-                    isTopSection ? 'border-green-500 bg-green-500/5' :
-                    isFlopSection ? 'border-destructive bg-destructive/5' :
-                    'border-foreground'
-                  }`}
-                >
-                  <div className={`text-2xl font-bold w-8 ${
-                    index === 0 && type !== 'twoWeeks' ? 'text-gold' : ''
-                  }`}>
-                    {type === 'twoWeeks' ? (index < 5 ? index + 1 : index - 4) : index + 1}
+          ) : (
+            <>
+              {type === 'twoWeeks' && topPlayers.length > 5 && (
+                <div className="mb-4 grid grid-cols-2 gap-3 text-sm">
+                  <div className="p-3 border-2 border-green-500 bg-green-500/10 text-center">
+                    <div className="font-bold">🔥 TOP 5</div>
                   </div>
-                  
-                  <PlayerAvatar name={player.name} avatar={player.avatar} size="sm" />
-                  
-                  <div className="flex-1">
-                    <div className="font-semibold">{player.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {player.wins}V - {player.losses}S
-                    </div>
-                  </div>
-                  
-                  <div className={`text-xl font-bold ${
-                    type === 'twoWeeks' && value < 0 ? 'text-destructive' : 
-                    type === 'twoWeeks' && value > 0 ? 'text-green-500' : ''
-                  }`}>
-                    {formatValue(value, index)}
+                  <div className="p-3 border-2 border-destructive bg-destructive/10 text-center">
+                    <div className="font-bold">💧 FLOP 5</div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              )}
+              
+              <div className="space-y-3">
+                {topPlayers.map(({ player, value }, index) => {
+                  const isTopSection = type === 'twoWeeks' && index < 5;
+                  const isFlopSection = type === 'twoWeeks' && index >= 5;
+                  
+                  return (
+                    <div
+                      key={`${player.id}-${index}`}
+                      className={`flex items-center gap-4 p-4 border-2 ${
+                        index === 0 && type !== 'twoWeeks' ? 'border-gold bg-gold/10' : 
+                        isTopSection ? 'border-green-500 bg-green-500/5' :
+                        isFlopSection ? 'border-destructive bg-destructive/5' :
+                        'border-foreground'
+                      }`}
+                    >
+                      <div className={`text-2xl font-bold w-8 ${
+                        index === 0 && type !== 'twoWeeks' ? 'text-gold' : ''
+                      }`}>
+                        {type === 'twoWeeks' && isFlopSection ? index - 4 : index + 1}
+                      </div>
+                      
+                      <PlayerAvatar name={player.name} avatar={player.avatar} size="sm" />
+                      
+                      <div className="flex-1">
+                        <div className="font-semibold">{player.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {player.wins}V - {player.losses}S
+                        </div>
+                      </div>
+                      
+                      <div className={`text-xl font-bold ${
+                        type === 'twoWeeks' && value < 0 ? 'text-destructive' : 
+                        type === 'twoWeeks' && value > 0 ? 'text-green-500' : ''
+                      }`}>
+                        {formatValue(value, index)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
