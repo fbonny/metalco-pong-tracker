@@ -27,6 +27,13 @@ export interface Match {
   created_at: string;
 }
 
+export interface Report {
+  id: string;
+  author: string;
+  content: string;
+  created_at: string;
+}
+
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const response = await fetch(`${DB_URL}/rest/v1/${endpoint}`, {
     ...options,
@@ -96,6 +103,25 @@ export async function updateMatch(id: string, updates: Partial<Match>): Promise<
 
 export async function deleteMatch(id: string): Promise<void> {
   await fetchAPI(`matches?id=eq.${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// Reports
+export async function getReports(): Promise<Report[]> {
+  return fetchAPI('reports?order=created_at.desc');
+}
+
+export async function createReport(report: Partial<Report>): Promise<Report> {
+  const [newReport] = await fetchAPI('reports', {
+    method: 'POST',
+    body: JSON.stringify(report),
+  });
+  return newReport;
+}
+
+export async function deleteReport(id: string): Promise<void> {
+  await fetchAPI(`reports?id=eq.${id}`, {
     method: 'DELETE',
   });
 }
