@@ -12,6 +12,7 @@ export interface Player {
   points: number;
   history: string[];
   best_rank?: number;
+  days_as_leader?: number;
   created_at: string;
   updated_at: string;
 }
