@@ -191,7 +191,21 @@ export async function recalculateAllStats(): Promise<void> {
     players.map((player, idx) => {
       const stats = playerStats[player.name];
       const currentRank = rankedPlayers.findIndex(p => p.name === player.name) + 1;
-      const bestRank = player.best_rank ? Math.min(player.best_rank, currentRank) : currentRank;
+      
+      // Calculate best rank: use current if player has no matches OR if current is better than recorded best
+      let bestRank: number;
+      const hasMatches = stats.wins + stats.losses > 0;
+      
+      if (!hasMatches) {
+        // If no matches, don't set a best_rank (it will be set when they play their first match)
+        bestRank = currentRank;
+      } else if (player.best_rank) {
+        // If has matches and has a recorded best, use the minimum
+        bestRank = Math.min(player.best_rank, currentRank);
+      } else {
+        // If has matches but no recorded best, use current rank
+        bestRank = currentRank;
+      }
       
       return updatePlayer(player.id, {
         ...stats,
