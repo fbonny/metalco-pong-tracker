@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Match, getMatches, deleteMatch, recalculateAllStats, Player, getPlayers } from '@/lib/database';
-import { Trophy, Flame, TrendingUp, TrendingDown, TrendingUpDown, Edit, Trash2, Users } from 'lucide-react';
+import { Trophy, Flame, TrendingUp, TrendingDown, TrendingUpDown, Edit, Trash2, Users, ChevronDown, ChevronRight, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StoricoTabProps {
@@ -8,9 +8,16 @@ interface StoricoTabProps {
   onStatsClick: (type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair') => void;
 }
 
+interface MatchesByDay {
+  date: string;
+  displayDate: string;
+  matches: Match[];
+}
+
 export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProps) {
   const [matches, setMatches] = useState<Match[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [stats, setStats] = useState({
     totalMatches: 0,
   });
@@ -46,22 +53,79 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
     );
   });
 
-  function formatDate(dateString: string) {
+  // Group matches by day
+  function groupMatchesByDay(matches: Match[]): MatchesByDay[] {
+    const groups = new Map<string, Match[]>();
+    
+    matches.forEach(match => {
+      const date = new Date(match.played_at);
+      const dayKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+      
+      if (!groups.has(dayKey)) {
+        groups.set(dayKey, []);
+      }
+      groups.get(dayKey)!.push(match);
+    });
+    
+    // Convert to array and sort by date (newest first)
+    return Array.from(groups.entries())
+      .map(([date, matches]) => ({
+        date,
+        displayDate: formatDayDate(date),
+        matches: matches.sort((a, b) => 
+          new Date(b.played_at).getTime() - new Date(a.played_at).getTime()
+        ),
+      }))
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  function formatDayDate(dateString: string): string {
+    const date = new Date(dateString + 'T12:00:00');
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const isToday = date.toDateString() === today.toDateString();
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+    
+    if (isToday) return 'Oggi';
+    if (isYesterday) return 'Ieri';
+    
+    return new Intl.DateTimeFormat('it-IT', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(date);
+  }
+
+  function formatTime(dateString: string): string {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('it-IT', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     }).format(date);
   }
 
+  function toggleDay(dayKey: string) {
+    setExpandedDays(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(dayKey)) {
+        newSet.delete(dayKey);
+      } else {
+        newSet.add(dayKey);
+      }
+      return newSet;
+    });
+  }
+
+  const matchesByDay = groupMatchesByDay(filteredMatches);
+
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-semibold mb-6">Storico Partite</h2>
       
-      {/* Stats Cards */}
+      {/* Stats Cards - Updated */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <button
           onClick={() => onStatsClick('leader')}
@@ -160,61 +224,106 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         />
       </div>
 
-      {/* Matches List */}
-      <div className="space-y-2">
-        {filteredMatches.map(match => {
-          const winner = match.score1 > match.score2;
+      {/* Matches by Day */}
+      <div className="space-y-3">
+        {matchesByDay.map(({ date, displayDate, matches }) => {
+          const isExpanded = expandedDays.has(date);
           
           return (
-            <div
-              key={match.id}
-              className="p-4 border-2 border-foreground hover:bg-muted transition-colors group"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="text-xs text-muted-foreground mb-2">
-                    {formatDate(match.played_at)} • {match.is_double ? 'Doppio' : 'Singolo'}
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className={`font-medium ${winner ? 'font-bold' : ''}`}>
-                      {match.team1.join(' + ')}
-                    </div>
-                    <div className={`text-2xl ${winner ? 'font-bold' : ''}`}>
-                      {match.score1}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className={`font-medium ${!winner ? 'font-bold' : ''}`}>
-                      {match.team2.join(' + ')}
-                    </div>
-                    <div className={`text-2xl ${!winner ? 'font-bold' : ''}`}>
-                      {match.score2}
+            <div key={date} className="border-2 border-foreground">
+              {/* Day Header - Clickable */}
+              <button
+                onClick={() => toggleDay(date)}
+                className="w-full p-4 hover:bg-muted transition-colors flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  {isExpanded ? (
+                    <ChevronDown className="w-5 h-5" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5" />
+                  )}
+                  <Calendar className="w-5 h-5" />
+                  <div className="text-left">
+                    <div className="font-semibold">{displayDate}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {matches.length} {matches.length === 1 ? 'partita' : 'partite'}
                     </div>
                   </div>
                 </div>
+                <div className="text-sm text-muted-foreground">
+                  {isExpanded ? 'Comprimi' : 'Espandi'}
+                </div>
+              </button>
 
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => onEditMatch(match)}
-                    className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors"
-                    title="Modifica"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(match.id)}
-                    className="p-2 border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                    title="Elimina"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+              {/* Matches for this day */}
+              {isExpanded && (
+                <div className="border-t-2 border-foreground">
+                  {matches.map((match, index) => {
+                    const winner = match.score1 > match.score2;
+                    
+                    return (
+                      <div
+                        key={match.id}
+                        className={`p-4 hover:bg-muted transition-colors group ${
+                          index > 0 ? 'border-t-2 border-foreground' : ''
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="text-xs text-muted-foreground mb-2">
+                              {formatTime(match.played_at)} • {match.is_double ? 'Doppio' : 'Singolo'}
+                            </div>
+                            
+                            <div className="flex items-center gap-3">
+                              <div className={`font-medium ${winner ? 'font-bold' : ''}`}>
+                                {match.team1.join(' + ')}
+                              </div>
+                              <div className={`text-2xl ${winner ? 'font-bold' : ''}`}>
+                                {match.score1}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-3 mt-2">
+                              <div className={`font-medium ${!winner ? 'font-bold' : ''}`}>
+                                {match.team2.join(' + ')}
+                              </div>
+                              <div className={`text-2xl ${!winner ? 'font-bold' : ''}`}>
+                                {match.score2}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => onEditMatch(match)}
+                              className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors"
+                              title="Modifica"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(match.id)}
+                              className="p-2 border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                              title="Elimina"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
+              )}
             </div>
           );
         })}
+        
+        {matchesByDay.length === 0 && (
+          <div className="text-center text-muted-foreground py-8">
+            Nessuna partita trovata
+          </div>
+        )}
       </div>
     </div>
   );
