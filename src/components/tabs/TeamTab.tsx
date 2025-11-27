@@ -38,21 +38,22 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
     // Shuffle players
     const shuffled = [...selectedPlayers].sort(() => Math.random() - 0.5);
     
-    // Split into two teams
-    const mid = Math.floor(shuffled.length / 2);
-    const teamBlu = shuffled.slice(0, mid);
-    const teamRosso = shuffled.slice(mid);
+    // Always take only 4 players (2 vs 2)
+    const selectedFour = shuffled.slice(0, 4);
+    
+    // Split into two teams of 2 players each
+    const teamBlu = selectedFour.slice(0, 2);
+    const teamRosso = selectedFour.slice(2, 4);
     
     setGeneratedTeams({ teamBlu, teamRosso });
+    
+    if (selectedPlayers.length > 4) {
+      toast.success(`Selezionati 4 giocatori casuali su ${selectedPlayers.length}`);
+    }
   }
 
   function handleUseForMatch() {
     if (!generatedTeams) return;
-    
-    if (generatedTeams.teamBlu.length !== 2 || generatedTeams.teamRosso.length !== 2) {
-      toast.error('Seleziona esattamente 4 giocatori per un doppio');
-      return;
-    }
     
     onUseForMatch({
       team1: generatedTeams.teamBlu,
@@ -68,6 +69,9 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
         <>
           <div className="mb-6">
             <h3 className="font-semibold mb-3">Seleziona Giocatori (min 4)</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Se selezioni più di 4 giocatori, verranno scelti casualmente 4 per creare 2 squadre da 2
+            </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {players.map(player => (
                 <button
