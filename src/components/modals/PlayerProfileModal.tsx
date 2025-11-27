@@ -233,6 +233,19 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                   </div>
                 </div>
 
+                {/* Days as Leader */}
+                {(player.days_as_leader || 0) > 0 && (
+                  <div className="p-4 border-2 border-gold bg-gold/10">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs text-muted-foreground mb-1">🏆 Giorni da #1</div>
+                        <div className="text-2xl font-bold text-gold">{player.days_as_leader} giorni</div>
+                      </div>
+                      <div className="text-4xl">👑</div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-3 gap-3">
                   <div className="p-4 border-2 border-foreground text-center">
                     <div className="text-2xl font-bold">{matchesPlayed}</div>
