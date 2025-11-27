@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Match, getMatches, deleteMatch, recalculateAllStats, Player, getPlayers } from '@/lib/database';
-import { Trophy, Flame, TrendingUp, TrendingDown, TrendingUpDown, Edit, Trash2 } from 'lucide-react';
+import { Trophy, Flame, TrendingUp, TrendingDown, TrendingUpDown, Edit, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StoricoTabProps {
   onEditMatch: (match: Match) => void;
-  onStatsClick: (type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks') => void;
+  onStatsClick: (type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair') => void;
 }
 
 export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProps) {
@@ -122,6 +122,17 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
           <div className="text-xs text-muted-foreground mb-1">Peggior % Sconfitte</div>
           <div className="flex items-center gap-2">
             <TrendingDown className="w-5 h-5 text-destructive" />
+            <span className="text-sm font-medium">Vedi Stats</span>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onStatsClick('mostPlayedPair')}
+          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left col-span-3"
+        >
+          <div className="text-xs text-muted-foreground mb-1">Coppia Più Ricorrente</div>
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
             <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>

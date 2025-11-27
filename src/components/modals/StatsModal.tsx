@@ -2,11 +2,19 @@ import { useState, useEffect } from 'react';
 import { Player, getPlayers, Match, getMatches, calculateMatchPoints } from '@/lib/database';
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
-import { Trophy, Target, Flame, TrendingUp, TrendingDown, TrendingUpDown, X } from 'lucide-react';
+import { Trophy, Target, Flame, TrendingUp, TrendingDown, TrendingUpDown, Users, X } from 'lucide-react';
 
 interface StatsModalProps {
-  type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks';
+  type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair';
   onClose: () => void;
+}
+
+interface PairStats {
+  player1: string;
+  player2: string;
+  matches: number;
+  wins: number;
+  losses: number;
 }
 
 export default function StatsModal({ type, onClose }: StatsModalProps) {
@@ -60,7 +68,56 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
     return maxStreak;
   }
 
+  function getMostPlayedPairs(): PairStats[] {
+    // Count pairs from double matches
+    const pairCounts = new Map<string, PairStats>();
+    
+    matches
+      .filter(m => m.is_double) // Only doubles
+      .forEach(match => {
+        // Process both teams
+        [match.team1, match.team2].forEach((team, teamIndex) => {
+          if (team.length === 2) {
+            // Create unique pair key (alphabetically sorted)
+            const [p1, p2] = team.sort();
+            const pairKey = `${p1}|${p2}`;
+            
+            if (!pairCounts.has(pairKey)) {
+              pairCounts.set(pairKey, {
+                player1: p1,
+                player2: p2,
+                matches: 0,
+                wins: 0,
+                losses: 0,
+              });
+            }
+            
+            const pairStats = pairCounts.get(pairKey)!;
+            pairStats.matches++;
+            
+            // Check if this team won
+            const won = (teamIndex === 0 && match.score1 > match.score2) || 
+                        (teamIndex === 1 && match.score2 > match.score1);
+            if (won) {
+              pairStats.wins++;
+            } else {
+              pairStats.losses++;
+            }
+          }
+        });
+      });
+    
+    // Convert to array and sort by matches played
+    return Array.from(pairCounts.values())
+      .sort((a, b) => b.matches - a.matches)
+      .slice(0, 10);
+  }
+
   function getTopPlayers() {
+    if (type === 'mostPlayedPair') {
+      return getMostPlayedPairs();
+    }
+
     if (type === 'winStreak') {
       // Calculate MAXIMUM consecutive WINS across entire history
       return players
@@ -151,6 +208,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
   }
 
   const topPlayers = getTopPlayers();
+  const isPairStats = type === 'mostPlayedPair';
 
   const titles = {
     leader: 'Re del Ranking',
@@ -160,6 +218,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
     winRate: 'Miglior % Vittorie',
     lossRate: 'Peggior % Sconfitte',
     twoWeeks: 'Top e Flop - 14gg',
+    mostPlayedPair: 'Coppia Più Ricorrente',
   };
 
   const IconComponent = {
@@ -170,6 +229,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
     winRate: TrendingUp,
     lossRate: TrendingDown,
     twoWeeks: TrendingUpDown,
+    mostPlayedPair: Users,
   }[type];
 
   function formatValue(value: number, playerIndex: number) {
@@ -213,7 +273,47 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
         <div className="p-6">
           {topPlayers.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
-              Nessun dato disponibile per questo periodo
+              {isPairStats ? 'Nessuna coppia trovata (solo partite doppie)' : 'Nessun dato disponibile per questo periodo'}
+            </div>
+          ) : isPairStats ? (
+            // Pair stats display
+            <div className="space-y-3">
+              {(topPlayers as PairStats[]).map((pair, index) => {
+                const player1 = players.find(p => p.name === pair.player1);
+                const player2 = players.find(p => p.name === pair.player2);
+                const winRate = (pair.wins / pair.matches) * 100;
+                
+                return (
+                  <div
+                    key={`${pair.player1}-${pair.player2}`}
+                    className={`p-4 border-2 ${
+                      index === 0 ? 'border-gold bg-gold/10' : 'border-foreground'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className={`text-2xl font-bold w-8 ${index === 0 ? 'text-gold' : ''}`}>
+                        {index + 1}
+                      </div>
+                      
+                      <div className="flex items-center gap-2 flex-1">
+                        <PlayerAvatar name={pair.player1} avatar={player1?.avatar} size="sm" />
+                        <span className="font-semibold">{pair.player1}</span>
+                        <span className="text-muted-foreground">+</span>
+                        <PlayerAvatar name={pair.player2} avatar={player2?.avatar} size="sm" />
+                        <span className="font-semibold">{pair.player2}</span>
+                      </div>
+                      
+                      <div className="text-xl font-bold">
+                        {pair.matches}
+                      </div>
+                    </div>
+                    
+                    <div className="text-sm text-muted-foreground ml-12">
+                      {pair.wins}V - {pair.losses}S • {winRate.toFixed(1)}% vittorie
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <>
@@ -229,7 +329,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
               )}
               
               <div className="space-y-3">
-                {topPlayers.map(({ player, value }, index) => {
+                {topPlayers.map(({ player, value }: any, index) => {
                   const isTopSection = type === 'twoWeeks' && index < 5;
                   const isFlopSection = type === 'twoWeeks' && index >= 5;
                   
