@@ -13,6 +13,8 @@ import PlayerProfileModal from '@/components/modals/PlayerProfileModal';
 import EditMatchModal from '@/components/modals/EditMatchModal';
 import StatsModal from '@/components/modals/StatsModal';
 import { Player, Match } from '@/lib/database';
+import { checkAndIncrementLeaderDays } from '@/lib/leaderDaysTracker';
+import { useEffect } from 'react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('match');
@@ -25,6 +27,11 @@ export default function Home() {
   
   // Team generator prefill
   const [teamsPrefill, setTeamsPrefill] = useState<{ team1: string[]; team2: string[] } | undefined>();
+
+  // Check and increment leader days on app load
+  useEffect(() => {
+    checkAndIncrementLeaderDays();
+  }, []);
 
   function handleRefresh() {
     setRefreshKey(k => k + 1);
