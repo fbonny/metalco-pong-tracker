@@ -16,8 +16,8 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        logo: ['var(--font-logo)'],
-        sans: ['var(--font-sans)'],
+        logo: ['Georgia', 'Cambria', 'serif'],
+        sans: ['Raleway', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
