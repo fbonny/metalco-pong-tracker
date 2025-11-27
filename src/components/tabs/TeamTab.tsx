@@ -35,15 +35,22 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
       return;
     }
 
+    console.log('🎯 Giocatori selezionati:', selectedPlayers);
+
     // Shuffle players
     const shuffled = [...selectedPlayers].sort(() => Math.random() - 0.5);
+    console.log('🔀 Giocatori mescolati:', shuffled);
     
     // Always take only 4 players (2 vs 2)
     const selectedFour = shuffled.slice(0, 4);
+    console.log('✂️ Presi primi 4 giocatori:', selectedFour);
     
     // Split into two teams of 2 players each
     const teamBlu = selectedFour.slice(0, 2);
     const teamRosso = selectedFour.slice(2, 4);
+    
+    console.log('🔵 Team Blu:', teamBlu);
+    console.log('🔴 Team Rosso:', teamRosso);
     
     setGeneratedTeams({ teamBlu, teamRosso });
     
