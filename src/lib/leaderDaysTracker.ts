@@ -9,7 +9,8 @@ const CHECK_HOUR = 14; // 14:00
  * 1. It's a new day (different from last increment)
  * 2. Current time is past 14:00
  */
-export async function checkAndIncrementLeaderDays(): Promise<void> {\n  try {
+export async function checkAndIncrementLeaderDays(): Promise<void> {
+  try {
     const now = new Date();
     const today = formatDateOnly(now);
     const lastIncrementDate = localStorage.getItem(LAST_INCREMENT_DATE_KEY);
