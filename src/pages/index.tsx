@@ -6,7 +6,6 @@ import MatchTab from '@/components/tabs/MatchTab';
 import RankTab from '@/components/tabs/RankTab';
 import TeamTab from '@/components/tabs/TeamTab';
 import StoricoTab from '@/components/tabs/StoricoTab';
-import ReportTab from '@/components/tabs/ReportTab';
 import NuovoTab from '@/components/tabs/NuovoTab';
 import InfoTab from '@/components/tabs/InfoTab';
 import PlayerProfileModal from '@/components/modals/PlayerProfileModal';
@@ -75,7 +74,6 @@ export default function Home() {
             onStatsClick={setStatsType}
           />
         )}
-        {activeTab === 'report' && <ReportTab />}
         {activeTab === 'nuovo' && (
           <NuovoTab onPlayerCreated={handleRefresh} />
         )}
