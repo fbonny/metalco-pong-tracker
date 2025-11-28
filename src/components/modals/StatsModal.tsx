@@ -201,7 +201,16 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
       return [...top5, ...bottom5];
     }
     
-    // For 'leader', just show top 5 by points
+    // For 'leader', show top 10 by days_as_leader
+    if (type === 'leader') {
+      return players
+        .filter(p => (p.days_as_leader || 0) > 0) // Only show players who have been #1
+        .map(p => ({ player: p, value: p.days_as_leader || 0 }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 10);
+    }
+    
+    // Default: top 5 by points
     return players
       .slice(0, 5)
       .map(p => ({ player: p, value: p.points }));
@@ -233,6 +242,9 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
   }[type];
 
   function formatValue(value: number, playerIndex: number) {
+    if (type === 'leader') {
+      return `${value} ${value === 1 ? 'giorno' : 'giorni'}`;
+    }
     if (type === 'winRate' || type === 'lossRate') {
       return `${value.toFixed(1)}%`;
     }
@@ -258,7 +270,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
         <div className="flex items-center justify-between p-6 border-b-2 border-foreground">
           <div className="flex items-center gap-3">
             <IconComponent 
-              className={`w-6 h-6 ${type === 'lossStreak' || type === 'lossRate' ? 'text-destructive' : type === 'winRate' || type === 'winStreak' ? 'text-green-500' : ''}`}
+              className={`w-6 h-6 ${type === 'lossStreak' || type === 'lossRate' ? 'text-destructive' : type === 'winRate' || type === 'winStreak' ? 'text-green-500' : type === 'leader' ? 'text-gold' : ''}`}
             />
             <h2 className="text-2xl font-semibold">{titles[type]}</h2>
           </div>
@@ -273,7 +285,9 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
         <div className="p-6">
           {topPlayers.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
-              {isPairStats ? 'Nessuna coppia trovata (solo partite doppie)' : 'Nessun dato disponibile per questo periodo'}
+              {type === 'leader' ? 'Nessun giocatore è stato ancora #1' : 
+               isPairStats ? 'Nessuna coppia trovata (solo partite doppie)' : 
+               'Nessun dato disponibile per questo periodo'}
             </div>
           ) : isPairStats ? (
             // Pair stats display
@@ -360,7 +374,8 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
                       
                       <div className={`text-xl font-bold ${
                         type === 'twoWeeks' && value < 0 ? 'text-destructive' : 
-                        type === 'twoWeeks' && value > 0 ? 'text-green-500' : ''
+                        type === 'twoWeeks' && value > 0 ? 'text-green-500' : 
+                        type === 'leader' ? 'text-gold' : ''
                       }`}>
                         {formatValue(value, index)}
                       </div>
