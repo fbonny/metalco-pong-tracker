@@ -1,29 +1,24 @@
 import { getPlayers, updatePlayer } from './database';
 
-const LAST_CHECK_KEY = 'pong_tracker_last_leader_check';
+const LAST_INCREMENT_DATE_KEY = 'pong_tracker_last_increment_date';
 const CHECK_HOUR = 14; // 14:00
 
 /**
  * Checks if we need to increment the leader's days counter
- * This runs when the app loads and checks if it's past 14:00 on a new day
+ * This runs when the app loads and checks if:
+ * 1. It's a new day (different from last increment)
+ * 2. Current time is past 14:00
  */
-export async function checkAndIncrementLeaderDays(): Promise<void> {
-  try {
+export async function checkAndIncrementLeaderDays(): Promise<void> {\n  try {
     const now = new Date();
-    const lastCheckStr = localStorage.getItem(LAST_CHECK_KEY);
+    const today = formatDateOnly(now);
+    const lastIncrementDate = localStorage.getItem(LAST_INCREMENT_DATE_KEY);
     
-    // If no last check, set it to now and return
-    if (!lastCheckStr) {
-      localStorage.setItem(LAST_CHECK_KEY, now.toISOString());
-      return;
-    }
-    
-    const lastCheck = new Date(lastCheckStr);
-    
-    // Check if we need to increment (it's a new day and past 14:00)
-    if (shouldIncrementLeader(lastCheck, now)) {
+    // If this is a new day AND we're past 14:00, increment
+    if (lastIncrementDate !== today && now.getHours() >= CHECK_HOUR) {
       await incrementLeaderDays();
-      localStorage.setItem(LAST_CHECK_KEY, now.toISOString());
+      localStorage.setItem(LAST_INCREMENT_DATE_KEY, today);
+      console.log(`✅ Incremented leader on ${today}`);
     }
   } catch (error) {
     console.error('Error checking leader days:', error);
@@ -31,27 +26,13 @@ export async function checkAndIncrementLeaderDays(): Promise<void> {
 }
 
 /**
- * Determines if we should increment the leader counter
- * Rules:
- * - Must be a different day than last check
- * - Must be past 14:00 today
- * - OR it's already past the 14:00 of the next day(s)
+ * Format date as YYYY-MM-DD (date only, no time)
  */
-function shouldIncrementLeader(lastCheck: Date, now: Date): boolean {
-  // Get the 14:00 timestamp for the last check day
-  const lastCheckAt14 = new Date(lastCheck);
-  lastCheckAt14.setHours(CHECK_HOUR, 0, 0, 0);
-  
-  // Get the 14:00 timestamp for today
-  const todayAt14 = new Date(now);
-  todayAt14.setHours(CHECK_HOUR, 0, 0, 0);
-  
-  // If last check was before 14:00 on that day, use that day's 14:00 as reference
-  // Otherwise use the next day's 14:00
-  const referenceTime = lastCheck < lastCheckAt14 ? lastCheckAt14 : new Date(lastCheckAt14.getTime() + 24 * 60 * 60 * 1000);
-  
-  // We should increment if now is past the reference time
-  return now >= referenceTime;
+function formatDateOnly(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -73,7 +54,7 @@ async function incrementLeaderDays(): Promise<void> {
       updated_at: new Date().toISOString(),
     });
     
-    console.log(`✅ Incremented leader days for ${leader.name}: ${newDays} days`);
+    console.log(`✅ Leader ${leader.name} now at ${newDays} days`);
   } catch (error) {
     console.error('Error incrementing leader days:', error);
     throw error;
@@ -85,5 +66,6 @@ async function incrementLeaderDays(): Promise<void> {
  */
 export async function manualIncrementLeaderDays(): Promise<void> {
   await incrementLeaderDays();
-  localStorage.setItem(LAST_CHECK_KEY, new Date().toISOString());
+  const today = formatDateOnly(new Date());
+  localStorage.setItem(LAST_INCREMENT_DATE_KEY, today);
 }
