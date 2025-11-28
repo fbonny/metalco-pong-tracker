@@ -15,6 +15,13 @@ export async function checkAndIncrementLeaderDays(): Promise<void> {
     const today = formatDateOnly(now);
     const lastIncrementDate = localStorage.getItem(LAST_INCREMENT_DATE_KEY);
     
+    // If no last increment date, just set it to today and don't increment
+    if (!lastIncrementDate) {
+      localStorage.setItem(LAST_INCREMENT_DATE_KEY, today);
+      console.log(`📅 First load - set increment date to ${today}`);
+      return;
+    }
+    
     // If this is a new day AND we're past 14:00, increment
     if (lastIncrementDate !== today && now.getHours() >= CHECK_HOUR) {
       await incrementLeaderDays();
