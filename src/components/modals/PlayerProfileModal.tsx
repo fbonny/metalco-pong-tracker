@@ -16,12 +16,11 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(player.name);
   const [avatar, setAvatar] = useState(player.avatar || '');
+  const [description, setDescription] = useState(player.description || '');
   const [hand, setHand] = useState(player.hand);
   const [shot, setShot] = useState(player.shot);
   const [loading, setLoading] = useState(false);
   const [showExpandedAvatar, setShowExpandedAvatar] = useState(false);
-
-  // ... rest of the state and functions remain the same ...
 
   const matchesPlayed = player.wins + player.losses;
   const winRate = matchesPlayed > 0 ? (player.wins / matchesPlayed) * 100 : 0;
@@ -72,6 +71,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
       await updatePlayer(player.id, {
         name: name.trim(),
         avatar: avatar || undefined,
+        description: description.trim() || undefined,
         hand,
         shot,
         updated_at: new Date().toISOString(),
@@ -157,9 +157,24 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                     onChange={handleAvatarChange}
                     className="w-full p-3 border-2 border-foreground bg-background"
                   />
+
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full p-3 border-2 border-foreground bg-background resize-none"
+                    placeholder="Descrizione giocatore (opzionale)"
+                    rows={3}
+                  />
                 </div>
               ) : (
-                <h3 className="text-2xl font-bold">{player.name}</h3>
+                <div className="w-full space-y-2">
+                  <h3 className="text-2xl font-bold text-center">{player.name}</h3>
+                  {player.description && (
+                    <p className="text-sm text-muted-foreground text-center italic px-4">
+                      "{player.description}"
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 
