@@ -6,6 +6,7 @@ export interface Player {
   name: string;
   avatar?: string;
   description?: string;
+  fame_photo?: string;
   hand: string;
   shot: string;
   wins: number;

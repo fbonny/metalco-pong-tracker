@@ -3,7 +3,7 @@ import { Player, updatePlayer, deletePlayer, getPlayers, recalculateAllStats } f
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
 import { compressImage } from '@/lib/imageUtils';
-import { X } from 'lucide-react';
+import { X, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PlayerProfileModalProps {
@@ -19,8 +19,11 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   const [description, setDescription] = useState(player.description || '');
   const [hand, setHand] = useState(player.hand);
   const [shot, setShot] = useState(player.shot);
+  const [famePhoto, setFamePhoto] = useState(player.famePhoto || '');
   const [loading, setLoading] = useState(false);
   const [showExpandedAvatar, setShowExpandedAvatar] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
 
   const matchesPlayed = player.wins + player.losses;
   const winRate = matchesPlayed > 0 ? (player.wins / matchesPlayed) * 100 : 0;
@@ -60,6 +63,19 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
     }
   }
 
+  async function handleFamePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const compressed = await compressImage(file);
+      setFamePhoto(compressed);
+    } catch (error) {
+      toast.error('Errore elaborazione immagine Fame');
+      console.error(error);
+    }
+  }
+
   async function handleSave() {
     if (!name.trim()) {
       toast.error('Il nome non può essere vuoto');
@@ -74,6 +90,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
         description: description.trim() || undefined,
         hand,
         shot,
+        famePhoto: famePhoto || undefined,
         updated_at: new Date().toISOString(),
       });
       
@@ -89,8 +106,6 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   }
 
   async function handleDelete() {
-    if (!confirm(`Eliminare ${player.name}? Verranno rimossi anche tutti i suoi match dallo storico.`)) return;
-
     setLoading(true);
     try {
       await deletePlayer(player.id);
@@ -104,6 +119,20 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleDeleteClick() {
+    setShowDeleteConfirm(true);
+    setDeleteConfirmName('');
+  }
+
+  function handleConfirmDelete() {
+    if (deleteConfirmName.trim().toLowerCase() !== player.name.toLowerCase()) {
+      toast.error('Il nome non corrisponde');
+      return;
+    }
+    setShowDeleteConfirm(false);
+    handleDelete();
   }
 
   return (
@@ -165,6 +194,34 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                     placeholder="Descrizione giocatore (opzionale)"
                     rows={3}
                   />
+
+                  {/* Fame Photo Upload - Only for players who have been #1 */}
+                  {(player.days_as_leader || 0) > 0 && (
+                    <div className="space-y-2">
+                      <label className="block font-semibold text-gold flex items-center gap-2">
+                        <Crown className="w-4 h-4" />
+                        Foto Wall of Fame
+                      </label>
+                      <p className="text-xs text-muted-foreground">
+                        Carica una foto speciale per la Wall of Fame (max 1MB)
+                      </p>
+                      {famePhoto && (
+                        <div className="flex justify-center">
+                          <img 
+                            src={famePhoto} 
+                            alt="Preview" 
+                            className="w-32 h-32 object-cover border-2 border-gold ring-2 ring-gold/50"
+                          />
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFamePhotoChange}
+                        className="w-full p-3 border-2 border-gold bg-gold/10"
+                      />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="w-full space-y-2">
@@ -318,7 +375,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
               ) : (
                 <>
                   <button
-                    onClick={handleDelete}
+                    onClick={handleDeleteClick}
                     className="py-3 px-6 border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors"
                     disabled={loading}
                   >
@@ -355,6 +412,51 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
             className="max-w-full max-h-full object-contain animate-zoom-in"
             onClick={(e) => e.stopPropagation()}
           />
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div 
+          className="fixed inset-0 bg-black/90 backdrop-blur-md z-[60] flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <div 
+            className="bg-background p-6 rounded-lg shadow-lg relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="absolute top-4 right-4 p-3 text-white hover:bg-white/10 transition-colors rounded-full"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <h3 className="text-xl font-semibold mb-4">Conferma Eliminazione</h3>
+            <p className="mb-4">Inserisci il nome del giocatore per confermare l'eliminazione.</p>
+            <input
+              type="text"
+              value={deleteConfirmName}
+              onChange={(e) => setDeleteConfirmName(e.target.value)}
+              className="w-full p-3 border-2 border-foreground bg-background mb-4"
+              placeholder="Nome giocatore"
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={handleConfirmDelete}
+                className="flex-1 py-3 bg-destructive text-destructive-foreground border-2 border-destructive hover:bg-destructive-foreground hover:text-destructive transition-colors"
+                disabled={loading}
+              >
+                Conferma
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 py-3 border-2 border-foreground hover:bg-muted transition-colors"
+                disabled={loading}
+              >
+                Annulla
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>
