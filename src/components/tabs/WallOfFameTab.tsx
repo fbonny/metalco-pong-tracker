@@ -61,19 +61,32 @@ export default function WallOfFameTab({ onPlayerClick }: WallOfFameTabProps) {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {legends.map((player) => {
+            // Use fame_photo if available, otherwise use avatar
+            const photoSrc = player.fame_photo || player.avatar;
+            
             return (
               <button
                 key={player.id}
                 onClick={() => onPlayerClick(player)}
                 className="flex flex-col items-center gap-3 p-4 border-2 border-gold bg-gold/10 transition-all hover:scale-105 leader-glow"
               >
-                {/* Player Avatar with gold ring */}
+                {/* Player Photo with gold ring */}
                 <div className="ring-4 ring-gold ring-offset-4 ring-offset-background rounded-full">
-                  <PlayerAvatar 
-                    name={player.name} 
-                    avatar={player.avatar} 
-                    size="xl"
-                  />
+                  {photoSrc ? (
+                    <div className="w-32 h-32 border-2 border-foreground">
+                      <img 
+                        src={photoSrc} 
+                        alt={player.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <PlayerAvatar 
+                      name={player.name} 
+                      avatar={player.avatar} 
+                      size="xl"
+                    />
+                  )}
                 </div>
 
                 {/* Player Name */}

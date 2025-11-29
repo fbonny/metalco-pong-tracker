@@ -6,7 +6,7 @@ export interface Player {
   name: string;
   avatar?: string;
   description?: string;
-  fame_photo?: string;
+  fame_entries?: FameEntry[];
   hand: string;
   shot: string;
   wins: number;
@@ -18,6 +18,12 @@ export interface Player {
   first_leader_date?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface FameEntry {
+  photo: string;
+  date: string;
+  caption?: string;
 }
 
 export interface Match {
