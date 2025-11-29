@@ -57,6 +57,14 @@ const config: Config = {
           DEFAULT: 'hsl(var(--gold))',
           foreground: 'hsl(var(--gold-foreground))',
         },
+        silver: {
+          DEFAULT: 'hsl(var(--silver))',
+          foreground: 'hsl(var(--silver-foreground))',
+        },
+        bronze: {
+          DEFAULT: 'hsl(var(--bronze))',
+          foreground: 'hsl(var(--bronze-foreground))',
+        },
         'team-blu': 'hsl(var(--team-blu))',
         'team-rosso': 'hsl(var(--team-rosso))',
       },

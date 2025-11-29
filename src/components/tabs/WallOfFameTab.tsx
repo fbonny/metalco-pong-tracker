@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Player, getPlayers } from '@/lib/database';
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
-import { Trophy, Crown, Medal } from 'lucide-react';
+import { Trophy, Crown } from 'lucide-react';
 
 interface WallOfFameTabProps {
   onPlayerClick: (player: Player) => void;
@@ -24,35 +24,14 @@ export default function WallOfFameTab({ onPlayerClick }: WallOfFameTabProps) {
     setLegends(hallOfFame);
   }
 
-  function getMedalColor(index: number): string {
-    if (index === 0) return 'border-gold bg-gold/10';
-    if (index === 1) return 'border-silver bg-silver/10';
-    if (index === 2) return 'border-bronze bg-bronze/10';
-    return 'border-foreground';
-  }
-
-  function getMedalIcon(index: number) {
-    if (index === 0) return <Crown className="w-8 h-8 text-gold" />;
-    if (index === 1) return <Medal className="w-7 h-7 text-silver" />;
-    if (index === 2) return <Medal className="w-7 h-7 text-bronze" />;
-    return <Trophy className="w-6 h-6" />;
-  }
-
-  function getMedalTextColor(index: number): string {
-    if (index === 0) return 'text-gold';
-    if (index === 1) return 'text-silver';
-    if (index === 2) return 'text-bronze';
-    return '';
-  }
-
   return (
     <div className="max-w-6xl mx-auto">
       {/* Header */}
       <div className="text-center mb-8">
         <div className="flex items-center justify-center gap-3 mb-2">
-          <Trophy className="w-8 h-8 text-gold" />
-          <h2 className="text-3xl font-bold">Wall of Fame</h2>
-          <Trophy className="w-8 h-8 text-gold" />
+          <Crown className="w-8 h-8 text-gold" />
+          <h2 className="text-3xl font-bold text-gold">Wall of Fame</h2>
+          <Crown className="w-8 h-8 text-gold" />
         </div>
         <p className="text-muted-foreground">
           I leggendari giocatori che hanno conquistato il trono #1
@@ -80,23 +59,21 @@ export default function WallOfFameTab({ onPlayerClick }: WallOfFameTabProps) {
               <button
                 key={player.id}
                 onClick={() => onPlayerClick(player)}
-                className={`p-6 border-2 transition-all hover:scale-105 relative ${getMedalColor(index)}`}
+                className="p-6 border-2 border-gold bg-gold/10 transition-all hover:scale-105 leader-glow relative"
               >
-                {/* Medal badge */}
-                <div className="absolute -top-3 -right-3 bg-background border-2 border-inherit rounded-full p-2">
-                  {getMedalIcon(index)}
+                {/* Crown badge top right */}
+                <div className="absolute -top-3 -right-3 bg-background border-2 border-gold rounded-full p-2">
+                  <Crown className="w-7 h-7 text-gold" />
                 </div>
 
                 {/* Rank number */}
-                {index < 3 && (
-                  <div className={`absolute top-3 left-3 text-4xl font-bold opacity-20 ${getMedalTextColor(index)}`}>
-                    #{index + 1}
-                  </div>
-                )}
+                <div className="absolute top-3 left-3 text-4xl font-bold text-gold opacity-20">
+                  #{index + 1}
+                </div>
 
-                {/* Player Avatar */}
+                {/* Player Avatar with gold ring */}
                 <div className="flex flex-col items-center gap-4 relative z-10">
-                  <div className={`${index === 0 ? 'ring-4 ring-gold ring-offset-4 ring-offset-background rounded-full' : ''}`}>
+                  <div className="ring-4 ring-gold ring-offset-4 ring-offset-background rounded-full">
                     <PlayerAvatar 
                       name={player.name} 
                       avatar={player.avatar} 
@@ -106,7 +83,7 @@ export default function WallOfFameTab({ onPlayerClick }: WallOfFameTabProps) {
 
                   {/* Player Name */}
                   <div className="text-center w-full">
-                    <h3 className={`text-xl font-bold mb-1 ${index === 0 ? 'text-gold' : ''}`}>
+                    <h3 className="text-xl font-bold mb-1 text-gold">
                       {player.name}
                     </h3>
                     {player.description && (
@@ -117,10 +94,10 @@ export default function WallOfFameTab({ onPlayerClick }: WallOfFameTabProps) {
                   </div>
 
                   {/* Days as Leader - Big Badge */}
-                  <div className={`w-full py-3 border-2 ${index === 0 ? 'border-gold bg-gold/20' : index === 1 ? 'border-silver bg-silver/20' : index === 2 ? 'border-bronze bg-bronze/20' : 'border-foreground'}`}>
+                  <div className="w-full py-3 border-2 border-gold bg-gold/20">
                     <div className="flex items-center justify-center gap-2">
-                      <Crown className={`w-5 h-5 ${getMedalTextColor(index)}`} />
-                      <span className={`text-2xl font-bold ${getMedalTextColor(index)}`}>
+                      <Crown className="w-5 h-5 text-gold" />
+                      <span className="text-2xl font-bold text-gold">
                         {player.days_as_leader}
                       </span>
                       <span className="text-sm text-muted-foreground">
@@ -151,7 +128,7 @@ export default function WallOfFameTab({ onPlayerClick }: WallOfFameTabProps) {
                   {/* Points */}
                   <div className="text-center">
                     <div className="text-xs text-muted-foreground mb-1">Punti Totali</div>
-                    <div className={`text-xl font-bold ${index === 0 ? 'text-gold' : ''}`}>
+                    <div className="text-xl font-bold text-gold">
                       {formatPoints(player.points)}
                     </div>
                   </div>
@@ -169,25 +146,17 @@ export default function WallOfFameTab({ onPlayerClick }: WallOfFameTabProps) {
         </div>
       )}
 
-      {/* Legend */}
+      {/* Info */}
       {legends.length > 0 && (
         <div className="mt-12 pt-8 border-t-2 border-foreground">
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <Crown className="w-5 h-5 text-gold" />
-              <span className="text-gold font-semibold">1° Posto</span>
-              <span className="text-muted-foreground">- Cornice Oro</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Medal className="w-5 h-5 text-silver" />
-              <span className="text-silver font-semibold">2° Posto</span>
-              <span className="text-muted-foreground">- Cornice Argento</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Medal className="w-5 h-5 text-bronze" />
-              <span className="text-bronze font-semibold">3° Posto</span>
-              <span className="text-muted-foreground">- Cornice Bronzo</span>
-            </div>
+          <div className="flex items-center justify-center gap-3 text-sm">
+            <Crown className="w-5 h-5 text-gold" />
+            <span className="text-gold font-semibold">
+              {legends.length} {legends.length === 1 ? 'Leggenda' : 'Leggende'}
+            </span>
+            <span className="text-muted-foreground">
+              {legends.length === 1 ? 'ha' : 'hanno'} conquistato il #1
+            </span>
           </div>
         </div>
       )}

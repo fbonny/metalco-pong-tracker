@@ -8,6 +8,7 @@ import TeamTab from '@/components/tabs/TeamTab';
 import StoricoTab from '@/components/tabs/StoricoTab';
 import NuovoTab from '@/components/tabs/NuovoTab';
 import InfoTab from '@/components/tabs/InfoTab';
+import WallOfFameTab from '@/components/tabs/WallOfFameTab';
 import PlayerProfileModal from '@/components/modals/PlayerProfileModal';
 import EditMatchModal from '@/components/modals/EditMatchModal';
 import StatsModal from '@/components/modals/StatsModal';
@@ -73,6 +74,9 @@ export default function Home() {
             onEditMatch={setEditingMatch}
             onStatsClick={setStatsType}
           />
+        )}
+        {activeTab === 'walloffame' && (
+          <WallOfFameTab onPlayerClick={setSelectedPlayer} />
         )}
         {activeTab === 'nuovo' && (
           <NuovoTab onPlayerCreated={handleRefresh} />
