@@ -31,6 +31,10 @@
     --chart-5: 27 87% 67%;
     --gold: 45 100% 51%;
     --gold-foreground: 0 0% 0%;
+    --silver: 0 0% 75%;
+    --silver-foreground: 0 0% 0%;
+    --bronze: 30 40% 50%;
+    --bronze-foreground: 0 0% 100%;
     
     /* Fonts */
     --font-sans: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
