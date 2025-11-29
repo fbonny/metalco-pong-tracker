@@ -12,14 +12,21 @@ interface PlayerProfileModalProps {
   onUpdate: () => void;
 }
 
+interface FameEntry {
+  photo: string;
+  caption: string;
+}
+
 export default function PlayerProfileModal({ player, onClose, onUpdate }: PlayerProfileModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(player.name);
   const [avatar, setAvatar] = useState(player.avatar || '');
   const [description, setDescription] = useState(player.description || '');
+  const [fameEntries, setFameEntries] = useState<FameEntry[]>(player.fame_entries || []);
+  const [newFamePhoto, setNewFamePhoto] = useState('');
+  const [newFameCaption, setNewFameCaption] = useState('');
   const [hand, setHand] = useState(player.hand);
   const [shot, setShot] = useState(player.shot);
-  const [famePhoto, setFamePhoto] = useState(player.famePhoto || '');
   const [loading, setLoading] = useState(false);
   const [showExpandedAvatar, setShowExpandedAvatar] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -69,7 +76,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
 
     try {
       const compressed = await compressImage(file);
-      setFamePhoto(compressed);
+      setNewFamePhoto(compressed);
     } catch (error) {
       toast.error('Errore elaborazione immagine Fame');
       console.error(error);
@@ -84,18 +91,26 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
 
     setLoading(true);
     try {
+      const updatedFameEntries = [...fameEntries];
+      if (newFamePhoto) {
+        updatedFameEntries.push({ photo: newFamePhoto, caption: newFameCaption });
+      }
+
       await updatePlayer(player.id, {
         name: name.trim(),
         avatar: avatar || undefined,
         description: description.trim() || undefined,
         hand,
         shot,
-        famePhoto: famePhoto || undefined,
+        fame_entries: updatedFameEntries,
         updated_at: new Date().toISOString(),
       });
-      
+
       toast.success('Profilo aggiornato!');
       setIsEditing(false);
+      setNewFamePhoto('');
+      setNewFameCaption('');
+      setFameEntries(updatedFameEntries);
       onUpdate();
     } catch (error) {
       toast.error('Errore aggiornamento profilo');
@@ -205,10 +220,10 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                       <p className="text-xs text-muted-foreground">
                         Carica una foto speciale per la Wall of Fame (max 1MB)
                       </p>
-                      {famePhoto && (
+                      {newFamePhoto && (
                         <div className="flex justify-center">
                           <img 
-                            src={famePhoto} 
+                            src={newFamePhoto} 
                             alt="Preview" 
                             className="w-32 h-32 object-cover border-2 border-gold ring-2 ring-gold/50"
                           />
@@ -219,6 +234,13 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                         accept="image/*"
                         onChange={handleFamePhotoChange}
                         className="w-full p-3 border-2 border-gold bg-gold/10"
+                      />
+                      <input
+                        type="text"
+                        value={newFameCaption}
+                        onChange={(e) => setNewFameCaption(e.target.value)}
+                        className="w-full p-3 border-2 border-gold bg-gold/10 mt-2"
+                        placeholder="Caption"
                       />
                     </div>
                   )}
@@ -418,42 +440,54 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div 
-          className="fixed inset-0 bg-black/90 backdrop-blur-md z-[60] flex items-center justify-center p-4 animate-fade-in"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in"
           onClick={() => setShowDeleteConfirm(false)}
         >
           <div 
-            className="bg-background p-6 rounded-lg shadow-lg relative"
+            className="bg-background border-2 border-destructive max-w-md w-full p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setShowDeleteConfirm(false)}
-              className="absolute top-4 right-4 p-3 text-white hover:bg-white/10 transition-colors rounded-full"
-            >
-              <X className="w-8 h-8" />
-            </button>
-            <h3 className="text-xl font-semibold mb-4">Conferma Eliminazione</h3>
-            <p className="mb-4">Inserisci il nome del giocatore per confermare l'eliminazione.</p>
-            <input
-              type="text"
-              value={deleteConfirmName}
-              onChange={(e) => setDeleteConfirmName(e.target.value)}
-              className="w-full p-3 border-2 border-foreground bg-background mb-4"
-              placeholder="Nome giocatore"
-            />
+            <div className="flex items-start gap-3">
+              <div className="text-4xl">⚠️</div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-destructive mb-2">
+                  Conferma Eliminazione
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Stai per eliminare <strong>{player.name}</strong>. Questa azione è <strong>irreversibile</strong> e rimuoverà:
+                </p>
+                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 mb-4">
+                  <li>Il profilo del giocatore</li>
+                  <li>Tutti i suoi match dallo storico</li>
+                  <li>Le sue statistiche</li>
+                </ul>
+                <p className="text-sm font-semibold mb-2">
+                  Per confermare, digita il nome del giocatore:
+                </p>
+                <input
+                  type="text"
+                  value={deleteConfirmName}
+                  onChange={(e) => setDeleteConfirmName(e.target.value)}
+                  className="w-full p-3 border-2 border-foreground bg-background mb-4"
+                  placeholder={player.name}
+                  autoFocus
+                />
+              </div>
+            </div>
+
             <div className="flex gap-3">
-              <button
-                onClick={handleConfirmDelete}
-                className="flex-1 py-3 bg-destructive text-destructive-foreground border-2 border-destructive hover:bg-destructive-foreground hover:text-destructive transition-colors"
-                disabled={loading}
-              >
-                Conferma
-              </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 py-3 border-2 border-foreground hover:bg-muted transition-colors"
-                disabled={loading}
               >
                 Annulla
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={deleteConfirmName.trim().toLowerCase() !== player.name.toLowerCase()}
+                className="flex-1 py-3 bg-destructive text-destructive-foreground border-2 border-destructive hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Elimina Definitivamente
               </button>
             </div>
           </div>
