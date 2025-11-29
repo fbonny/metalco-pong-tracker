@@ -1,4 +1,4 @@
-import { Trophy, Users, History, UserPlus, Info, Target } from 'lucide-react';
+import { Trophy, Users, History, UserPlus, Info, Target, Award } from 'lucide-react';
 
 interface BottomNavProps {
   activeTab: string;
@@ -10,6 +10,7 @@ const tabs = [
   { id: 'rank', label: 'Classifica', Icon: Trophy },
   { id: 'team', label: 'Squadre', Icon: Users },
   { id: 'storico', label: 'Storico', Icon: History },
+  { id: 'walloffame', label: 'Hall of Fame', Icon: Award },
   { id: 'nuovo', label: 'Nuovo', Icon: UserPlus },
   { id: 'info', label: 'Info', Icon: Info },
 ];
@@ -17,7 +18,7 @@ const tabs = [
 export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background border-t-2 border-foreground z-50">
-      <div className="grid grid-cols-6 max-w-screen-lg mx-auto">
+      <div className="grid grid-cols-7 max-w-screen-lg mx-auto">
         {tabs.map(tab => {
           const Icon = tab.Icon;
           return (
