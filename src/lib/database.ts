@@ -5,6 +5,7 @@ export interface Player {
   id: string;
   name: string;
   avatar?: string;
+  description?: string;
   hand: string;
   shot: string;
   wins: number;
@@ -13,6 +14,7 @@ export interface Player {
   history: string[];
   best_rank?: number;
   days_as_leader?: number;
+  first_leader_date?: string;
   created_at: string;
   updated_at: string;
 }
