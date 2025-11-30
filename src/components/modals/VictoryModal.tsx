@@ -17,11 +17,11 @@ export default function VictoryModal({ winners, onClose }: VictoryModalProps) {
   if (!show) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
       onClick={onClose}
     >
-      <div 
+      <div
         className="bg-background border-4 border-gold max-w-2xl w-full p-8 relative animate-zoom-in"
         onClick={(e) => e.stopPropagation()}
         style={{ boxShadow: '0 8px 0 hsl(var(--gold)), 0 16px 40px rgba(255, 215, 0, 0.4)' }}
@@ -35,13 +35,13 @@ export default function VictoryModal({ winners, onClose }: VictoryModalProps) {
         </button>
 
         {/* WIN Text - Animated */}
-        <div 
+        <div
           className="text-center mb-8 animate-vs-appear opacity-0"
           style={{ animationFillMode: 'forwards', animationDelay: '0.2s' }}
         >
-          <div 
+          <div
             className="text-8xl font-bold animate-vs-pulse uppercase tracking-widest"
-            style={{ 
+            style={{
               color: 'hsl(var(--gold))',
               WebkitTextStroke: '3px black',
               textShadow: '5px 5px 0 rgba(0, 0, 0, 0.3)',
@@ -60,26 +60,26 @@ export default function VictoryModal({ winners, onClose }: VictoryModalProps) {
             <div
               key={index}
               className={`animate-slide-in-${index % 2 === 0 ? 'left' : 'right'} opacity-0`}
-              style={{ 
+              style={{
                 animationFillMode: 'forwards',
-                animationDelay: `${index * 0.1}s`
+                animationDelay: `${index * 0.1}s`,
               }}
             >
               <div
                 className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-gold bg-gold/10 flex items-center justify-center"
-                style={{ 
-                  boxShadow: '0 4px 0 hsl(var(--gold)), 0 8px 20px rgba(255, 215, 0, 0.3)'
+                style={{
+                  boxShadow: '0 4px 0 hsl(var(--gold)), 0 8px 20px rgba(255, 215, 0, 0.3)',
                 }}
               >
                 {winner.avatar ? (
-                  <img 
-                    src={winner.avatar} 
+                  <img
+                    src={winner.avatar}
                     alt={winner.name}
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="text-4xl font-bold text-gold">
-                    {winner.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                    {winner.name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2)}
                   </div>
                 )}
               </div>
@@ -88,15 +88,15 @@ export default function VictoryModal({ winners, onClose }: VictoryModalProps) {
         </div>
 
         {/* Winners Names */}
-        <div 
+        <div
           className="text-center animate-slide-in-left opacity-0"
-          style={{ 
+          style={{
             animationFillMode: 'forwards',
-            animationDelay: `${winners.length * 0.1 + 0.1}s`
+            animationDelay: `${winners.length * 0.1 + 0.1}s`,
           }}
         >
           <div className="text-3xl font-bold text-gold uppercase tracking-wide mb-2">
-            {winners.map(w => w.name).join(' & ')}
+            {winners.map((w) => w.name).join(' & ')}
           </div>
           <div className="text-sm text-muted-foreground uppercase tracking-widest">
             {winners.length === 1 ? 'Champion' : 'Champions'}
@@ -120,11 +120,11 @@ export default function VictoryModal({ winners, onClose }: VictoryModalProps) {
         </div>
 
         {/* Continue Button */}
-        <div 
+        <div
           className="mt-8 animate-fade-in opacity-0"
-          style={{ 
+          style={{
             animationFillMode: 'forwards',
-            animationDelay: `${winners.length * 0.1 + 0.3}s`
+            animationDelay: `${winners.length * 0.1 + 0.3}s`,
           }}
         >
           <button
