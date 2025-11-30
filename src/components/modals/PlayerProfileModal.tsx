@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Player, updatePlayer, deletePlayer, getPlayers, recalculateAllStats } from '@/lib/database';
+import { Player, updatePlayer, deletePlayer, getPlayers, recalculateAllStats, FameEntry } from '@/lib/database';
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
 import { compressImage } from '@/lib/imageUtils';
@@ -10,12 +10,6 @@ interface PlayerProfileModalProps {
   player: Player;
   onClose: () => void;
   onUpdate: () => void;
-}
-
-interface FameEntry {
-  photo: string;
-  caption: string;
-  date?: string;
 }
 
 export default function PlayerProfileModal({ player, onClose, onUpdate }: PlayerProfileModalProps) {
