@@ -49,7 +49,7 @@ export default function Home() {
       
       {/* Header */}
       <header className="border-b-2 border-foreground py-6 px-4 mb-8">
-        <div className="max-w-7xl mx-auto flex justify-center">
+        <div className="text-center">
           <Logo />
         </div>
       </header>
