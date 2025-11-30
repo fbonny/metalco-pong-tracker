@@ -24,12 +24,22 @@ export default function WallOfFameTab({ onPlayerClick }: WallOfFameTabProps) {
   }
 
   function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('it-IT', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).format(date);
+    if (!dateString) return 'Data non disponibile';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Data non valida';
+      }
+      return new Intl.DateTimeFormat('it-IT', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).format(date);
+    } catch (error) {
+      console.error('Error formatting date:', dateString, error);
+      return 'Data non disponibile';
+    }
   }
 
   return (
