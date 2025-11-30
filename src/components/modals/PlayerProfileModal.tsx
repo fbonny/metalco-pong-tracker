@@ -272,47 +272,61 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
 
                       {/* Add New Fame Photo */}
                       <div className="space-y-3 pt-4 border-t border-gold/30">
-                        <div className="text-sm font-semibold flex items-center gap-2">
-                          <Plus className="w-4 h-4" />
-                          Aggiungi nuova foto
+                        <div className="text-sm font-semibold flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Plus className="w-4 h-4" />
+                            Aggiungi nuova foto
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {fameEntries.length}/10 foto
+                          </div>
                         </div>
-                        
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFamePhotoChange}
-                          className="w-full p-3 border-2 border-gold bg-gold/10 text-sm"
-                        />
 
-                        {newFamePhoto && (
+                        {fameEntries.length >= 10 ? (
+                          <div className="p-3 border-2 border-destructive/50 bg-destructive/10 text-sm text-destructive">
+                            ⚠️ Hai raggiunto il limite di 10 foto. Rimuovine una per aggiungerne di nuove.
+                          </div>
+                        ) : (
                           <>
-                            <div className="flex justify-center">
-                              <img 
-                                src={newFamePhoto} 
-                                alt="Preview" 
-                                className="w-32 h-32 object-cover border-2 border-gold ring-2 ring-gold/50"
-                              />
-                            </div>
-                            
                             <input
-                              type="text"
-                              value={newFameCaption}
-                              onChange={(e) => setNewFameCaption(e.target.value)}
-                              className="w-full p-3 border-2 border-gold bg-background"
-                              placeholder="Didascalia (opzionale)"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFamePhotoChange}
+                              className="w-full p-3 border-2 border-gold bg-gold/10 text-sm"
                             />
 
-                            <button
-                              onClick={handleAddFameEntry}
-                              type="button"
-                              className="w-full py-3 bg-gold text-gold-foreground border-2 border-gold hover:bg-gold/80 transition-colors font-semibold"
-                            >
-                              <Plus className="w-4 h-4 inline mr-2" />
-                              Aggiungi all'archivio
-                            </button>
+                            {newFamePhoto && (
+                              <>
+                                <div className="flex justify-center">
+                                  <img 
+                                    src={newFamePhoto} 
+                                    alt="Preview" 
+                                    className="w-32 h-32 object-cover border-2 border-gold ring-2 ring-gold/50"
+                                  />
+                                </div>
+                                
+                                <input
+                                  type="text"
+                                  value={newFameCaption}
+                                  onChange={(e) => setNewFameCaption(e.target.value)}
+                                  className="w-full p-3 border-2 border-gold bg-background"
+                                  placeholder="Didascalia (opzionale)"
+                                />
+
+                                <button
+                                  onClick={handleAddFameEntry}
+                                  type="button"
+                                  className="w-full py-3 bg-gold text-gold-foreground border-2 border-gold hover:bg-gold/80 transition-colors font-semibold"
+                                >
+                                  <Plus className="w-4 h-4 inline mr-2" />
+                                  Aggiungi all'archivio
+                                </button>
+                              </>
+                            )}
                           </>
                         )}
                       </div>
+
                     </div>
                   )}
                 </div>
