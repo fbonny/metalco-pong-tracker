@@ -89,15 +89,21 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   }
 
   function handleAddFameEntry() {
-    if (!newFamePhoto) return;
+    if (!newFamePhoto) {
+      toast.error('Carica prima una foto');
+      return;
+    }
+
     const newEntry: FameEntry = {
       photo: newFamePhoto,
-      caption: newFameCaption,
       date: new Date().toISOString(),
+      caption: newFameCaption.trim() || undefined,
     };
-    setFameEntries(prev => [...prev, newEntry]);
+
+    setFameEntries([...fameEntries, newEntry]);
     setNewFamePhoto('');
     setNewFameCaption('');
+    toast.success('Foto aggiunta! Salva per confermare.');
   }
 
   async function handleSave() {
