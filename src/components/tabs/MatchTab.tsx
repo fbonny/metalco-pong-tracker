@@ -281,10 +281,37 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
 
       {/* Victory Modal */}
       {showVictory && (
-        <VictoryModal
-          winners={winners}
-          onClose={() => setShowVictory(false)}
-        />
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'red',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '50px',
+            fontSize: '50px',
+            fontWeight: 'bold'
+          }}>
+            TEST MODALE - VINCITORI: {winners.map(w => w.name).join(', ')}
+            <br />
+            <button onClick={() => setShowVictory(false)} style={{
+              marginTop: '20px',
+              padding: '20px',
+              fontSize: '30px',
+              backgroundColor: 'blue',
+              color: 'white'
+            }}>
+              CHIUDI
+            </button>
+          </div>
+        </div>
       )}
     </>
   );
