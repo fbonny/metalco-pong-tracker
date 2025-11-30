@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Player, getPlayers, createMatch, recalculateAllStats } from '@/lib/database';
 import PlayerAvatar from '@/components/PlayerAvatar';
+import VictoryModal from '@/components/modals/VictoryModal';
 import { toast } from 'sonner';
 
 interface MatchTabProps {
@@ -18,6 +19,8 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
   const [score1, setScore1] = useState('');
   const [score2, setScore2] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showVictory, setShowVictory] = useState(false);
+  const [winners, setWinners] = useState<{ name: string; avatar?: string }[]>([]);
 
   useEffect(() => {
     loadPlayers();
@@ -90,6 +93,19 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
 
       await recalculateAllStats();
 
+      // Determine winners
+      const winningTeam = s1 > s2 ? team1 : team2;
+      const winningPlayers = winningTeam.map(name => {
+        const player = players.find(p => p.name === name);
+        return {
+          name,
+          avatar: player?.avatar
+        };
+      });
+
+      setWinners(winningPlayers);
+      setShowVictory(true);
+
       toast.success('Partita salvata!');
 
       // Reset form
@@ -116,151 +132,161 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
   );
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Nuova Partita</h2>
+    <>
+      <div className="max-w-2xl mx-auto">
+        <h2 className="text-2xl font-semibold mb-6">Nuova Partita</h2>
 
-      <div className="mb-6 flex gap-2">
-        <button
-          onClick={() => setIsDouble(false)}
-          className={`flex-1 py-3 border-2 transition-colors ${
-            !isDouble
-              ? 'bg-foreground text-background border-foreground'
-              : 'bg-background text-foreground border-foreground hover:bg-muted'
-          }`}
-        >
-          Singolo
-        </button>
-        <button
-          onClick={() => setIsDouble(true)}
-          className={`flex-1 py-3 border-2 transition-colors ${
-            isDouble
-              ? 'bg-foreground text-background border-foreground'
-              : 'bg-background text-foreground border-foreground hover:bg-muted'
-          }`}
-        >
-          Doppio
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Team 1 */}
-          <div className="border-2 border-foreground p-4">
-            <h3 className="font-semibold mb-3">Squadra 1</h3>
-            <div className="space-y-3">
-              <select
-                value={player1}
-                onChange={(e) => setPlayer1(e.target.value)}
-                className="w-full p-3 border-2 border-foreground bg-background"
-                required
-              >
-                <option value="">Seleziona Giocatore 1</option>
-                {players
-                  .filter(p => ![player2, player3, player4].includes(p.name))
-                  .map(p => (
-                    <option key={p.id} value={p.name}>
-                      {p.name}
-                    </option>
-                  ))}
-              </select>
-
-              {isDouble && (
-                <select
-                  value={player2}
-                  onChange={(e) => setPlayer2(e.target.value)}
-                  className="w-full p-3 border-2 border-foreground bg-background"
-                  required
-                >
-                  <option value="">Seleziona Giocatore 2</option>
-                  {players
-                    .filter(p => ![player1, player3, player4].includes(p.name))
-                    .map(p => (
-                      <option key={p.id} value={p.name}>
-                        {p.name}
-                      </option>
-                    ))}
-                </select>
-              )}
-
-              <input
-                type="number"
-                value={score1}
-                onChange={(e) => setScore1(e.target.value)}
-                placeholder="Punti"
-                className="w-full p-3 border-2 border-foreground bg-background"
-                min="0"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Team 2 */}
-          <div className="border-2 border-foreground p-4">
-            <h3 className="font-semibold mb-3">Squadra 2</h3>
-            <div className="space-y-3">
-              <select
-                value={isDouble ? player3 : player2}
-                onChange={(e) =>
-                  isDouble ? setPlayer3(e.target.value) : setPlayer2(e.target.value)
-                }
-                className="w-full p-3 border-2 border-foreground bg-background"
-                required
-              >
-                <option value="">
-                  Seleziona Giocatore {isDouble ? '3' : '2'}
-                </option>
-                {players
-                  .filter(p =>
-                    isDouble
-                      ? ![player1, player2, player4].includes(p.name)
-                      : ![player1].includes(p.name)
-                  )
-                  .map(p => (
-                    <option key={p.id} value={p.name}>
-                      {p.name}
-                    </option>
-                  ))}
-              </select>
-
-              {isDouble && (
-                <select
-                  value={player4}
-                  onChange={(e) => setPlayer4(e.target.value)}
-                  className="w-full p-3 border-2 border-foreground bg-background"
-                  required
-                >
-                  <option value="">Seleziona Giocatore 4</option>
-                  {players
-                    .filter(p => ![player1, player2, player3].includes(p.name))
-                    .map(p => (
-                      <option key={p.id} value={p.name}>
-                        {p.name}
-                      </option>
-                    ))}
-                </select>
-              )}
-
-              <input
-                type="number"
-                value={score2}
-                onChange={(e) => setScore2(e.target.value)}
-                placeholder="Punti"
-                className="w-full p-3 border-2 border-foreground bg-background"
-                min="0"
-                required
-              />
-            </div>
-          </div>
+        <div className="mb-6 flex gap-2">
+          <button
+            onClick={() => setIsDouble(false)}
+            className={`flex-1 py-3 border-2 transition-colors ${
+              !isDouble
+                ? 'bg-foreground text-background border-foreground'
+                : 'bg-background text-foreground border-foreground hover:bg-muted'
+            }`}
+          >
+            Singolo
+          </button>
+          <button
+            onClick={() => setIsDouble(true)}
+            className={`flex-1 py-3 border-2 transition-colors ${
+              isDouble
+                ? 'bg-foreground text-background border-foreground'
+                : 'bg-background text-foreground border-foreground hover:bg-muted'
+            }`}
+          >
+            Doppio
+          </button>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-4 bg-foreground text-background border-2 border-foreground font-semibold hover:bg-background hover:text-foreground transition-colors disabled:opacity-50"
-        >
-          {loading ? 'Salvataggio...' : 'Salva Risultato'}
-        </button>
-      </form>
-    </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Team 1 */}
+            <div className="border-2 border-foreground p-4">
+              <h3 className="font-semibold mb-3">Squadra 1</h3>
+              <div className="space-y-3">
+                <select
+                  value={player1}
+                  onChange={(e) => setPlayer1(e.target.value)}
+                  className="w-full p-3 border-2 border-foreground bg-background"
+                  required
+                >
+                  <option value="">Seleziona Giocatore 1</option>
+                  {players
+                    .filter(p => ![player2, player3, player4].includes(p.name))
+                    .map(p => (
+                      <option key={p.id} value={p.name}>
+                        {p.name}
+                      </option>
+                    ))}
+                </select>
+
+                {isDouble && (
+                  <select
+                    value={player2}
+                    onChange={(e) => setPlayer2(e.target.value)}
+                    className="w-full p-3 border-2 border-foreground bg-background"
+                    required
+                  >
+                    <option value="">Seleziona Giocatore 2</option>
+                    {players
+                      .filter(p => ![player1, player3, player4].includes(p.name))
+                      .map(p => (
+                        <option key={p.id} value={p.name}>
+                          {p.name}
+                        </option>
+                      ))}
+                  </select>
+                )}
+
+                <input
+                  type="number"
+                  value={score1}
+                  onChange={(e) => setScore1(e.target.value)}
+                  placeholder="Punti"
+                  className="w-full p-3 border-2 border-foreground bg-background"
+                  min="0"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Team 2 */}
+            <div className="border-2 border-foreground p-4">
+              <h3 className="font-semibold mb-3">Squadra 2</h3>
+              <div className="space-y-3">
+                <select
+                  value={isDouble ? player3 : player2}
+                  onChange={(e) =>
+                    isDouble ? setPlayer3(e.target.value) : setPlayer2(e.target.value)
+                  }
+                  className="w-full p-3 border-2 border-foreground bg-background"
+                  required
+                >
+                  <option value="">
+                    Seleziona Giocatore {isDouble ? '3' : '2'}
+                  </option>
+                  {players
+                    .filter(p =>
+                      isDouble
+                        ? ![player1, player2, player4].includes(p.name)
+                        : ![player1].includes(p.name)
+                    )
+                    .map(p => (
+                      <option key={p.id} value={p.name}>
+                        {p.name}
+                      </option>
+                    ))}
+                </select>
+
+                {isDouble && (
+                  <select
+                    value={player4}
+                    onChange={(e) => setPlayer4(e.target.value)}
+                    className="w-full p-3 border-2 border-foreground bg-background"
+                    required
+                  >
+                    <option value="">Seleziona Giocatore 4</option>
+                    {players
+                      .filter(p => ![player1, player2, player3].includes(p.name))
+                      .map(p => (
+                        <option key={p.id} value={p.name}>
+                          {p.name}
+                        </option>
+                      ))}
+                  </select>
+                )}
+
+                <input
+                  type="number"
+                  value={score2}
+                  onChange={(e) => setScore2(e.target.value)}
+                  placeholder="Punti"
+                  className="w-full p-3 border-2 border-foreground bg-background"
+                  min="0"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 bg-foreground text-background border-2 border-foreground font-semibold hover:bg-background hover:text-foreground transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Salvataggio...' : 'Salva Risultato'}
+          </button>
+        </form>
+      </div>
+
+      {/* Victory Modal */}
+      {showVictory && (
+        <VictoryModal
+          winners={winners}
+          onClose={() => setShowVictory(false)}
+        />
+      )}
+    </>
   );
 }
