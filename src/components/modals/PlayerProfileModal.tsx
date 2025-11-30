@@ -3,7 +3,7 @@ import { Player, updatePlayer, deletePlayer, getPlayers, recalculateAllStats } f
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
 import { compressImage } from '@/lib/imageUtils';
-import { X, Crown } from 'lucide-react';
+import { X, Crown, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PlayerProfileModalProps {
@@ -15,6 +15,7 @@ interface PlayerProfileModalProps {
 interface FameEntry {
   photo: string;
   caption: string;
+  date?: string;
 }
 
 export default function PlayerProfileModal({ player, onClose, onUpdate }: PlayerProfileModalProps) {
@@ -83,6 +84,22 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
     }
   }
 
+  function handleRemoveFameEntry(index: number) {
+    setFameEntries(prev => prev.filter((_, i) => i !== index));
+  }
+
+  function handleAddFameEntry() {
+    if (!newFamePhoto) return;
+    const newEntry: FameEntry = {
+      photo: newFamePhoto,
+      caption: newFameCaption,
+      date: new Date().toISOString(),
+    };
+    setFameEntries(prev => [...prev, newEntry]);
+    setNewFamePhoto('');
+    setNewFameCaption('');
+  }
+
   async function handleSave() {
     if (!name.trim()) {
       toast.error('Il nome non può essere vuoto');
@@ -91,18 +108,13 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
 
     setLoading(true);
     try {
-      const updatedFameEntries = [...fameEntries];
-      if (newFamePhoto) {
-        updatedFameEntries.push({ photo: newFamePhoto, caption: newFameCaption });
-      }
-
       await updatePlayer(player.id, {
         name: name.trim(),
         avatar: avatar || undefined,
         description: description.trim() || undefined,
         hand,
         shot,
-        fame_entries: updatedFameEntries,
+        fame_entries: fameEntries,
         updated_at: new Date().toISOString(),
       });
 
@@ -110,7 +122,6 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
       setIsEditing(false);
       setNewFamePhoto('');
       setNewFameCaption('');
-      setFameEntries(updatedFameEntries);
       onUpdate();
     } catch (error) {
       toast.error('Errore aggiornamento profilo');
@@ -210,38 +221,98 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                     rows={3}
                   />
 
-                  {/* Fame Photo Upload - Only for players who have been #1 */}
+                  {/* Fame Photos Archive - Only for players who have been #1 */}
                   {(player.days_as_leader || 0) > 0 && (
-                    <div className="space-y-2">
+                    <div className="space-y-4 p-4 border-2 border-gold bg-gold/5">
                       <label className="block font-semibold text-gold flex items-center gap-2">
-                        <Crown className="w-4 h-4" />
-                        Foto Wall of Fame
+                        <Crown className="w-5 h-5" />
+                        Archivio Wall of Fame
                       </label>
                       <p className="text-xs text-muted-foreground">
-                        Carica una foto speciale per la Wall of Fame (max 1MB)
+                        Aggiungi foto storiche quando conquisti il #1. Ogni foto resta per sempre nell'archivio!
                       </p>
-                      {newFamePhoto && (
-                        <div className="flex justify-center">
-                          <img 
-                            src={newFamePhoto} 
-                            alt="Preview" 
-                            className="w-32 h-32 object-cover border-2 border-gold ring-2 ring-gold/50"
-                          />
+
+                      {/* Existing Fame Photos */}
+                      {fameEntries.length > 0 && (
+                        <div className="space-y-3">
+                          <div className="text-sm font-semibold">Foto nell'archivio ({fameEntries.length})</div>
+                          {fameEntries.map((entry, index) => (
+                            <div key={index} className="flex gap-3 p-3 border border-gold/30 bg-background">
+                              <img 
+                                src={entry.photo} 
+                                alt={`Fame ${index + 1}`}
+                                className="w-20 h-20 object-cover border-2 border-gold"
+                              />
+                              <div className="flex-1">
+                                <div className="text-sm font-semibold">
+                                  {new Date(entry.date || '').toLocaleDateString('it-IT', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric'
+                                  })}
+                                </div>
+                                {entry.caption && (
+                                  <div className="text-xs text-muted-foreground italic mt-1">
+                                    "{entry.caption}"
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleRemoveFameEntry(index)}
+                                type="button"
+                                className="p-2 text-destructive hover:bg-destructive/10 transition-colors"
+                                title="Rimuovi"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFamePhotoChange}
-                        className="w-full p-3 border-2 border-gold bg-gold/10"
-                      />
-                      <input
-                        type="text"
-                        value={newFameCaption}
-                        onChange={(e) => setNewFameCaption(e.target.value)}
-                        className="w-full p-3 border-2 border-gold bg-gold/10 mt-2"
-                        placeholder="Caption"
-                      />
+
+                      {/* Add New Fame Photo */}
+                      <div className="space-y-3 pt-4 border-t border-gold/30">
+                        <div className="text-sm font-semibold flex items-center gap-2">
+                          <Plus className="w-4 h-4" />
+                          Aggiungi nuova foto
+                        </div>
+                        
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFamePhotoChange}
+                          className="w-full p-3 border-2 border-gold bg-gold/10 text-sm"
+                        />
+
+                        {newFamePhoto && (
+                          <>
+                            <div className="flex justify-center">
+                              <img 
+                                src={newFamePhoto} 
+                                alt="Preview" 
+                                className="w-32 h-32 object-cover border-2 border-gold ring-2 ring-gold/50"
+                              />
+                            </div>
+                            
+                            <input
+                              type="text"
+                              value={newFameCaption}
+                              onChange={(e) => setNewFameCaption(e.target.value)}
+                              className="w-full p-3 border-2 border-gold bg-background"
+                              placeholder="Didascalia (opzionale)"
+                            />
+
+                            <button
+                              onClick={handleAddFameEntry}
+                              type="button"
+                              className="w-full py-3 bg-gold text-gold-foreground border-2 border-gold hover:bg-gold/80 transition-colors font-semibold"
+                            >
+                              <Plus className="w-4 h-4 inline mr-2" />
+                              Aggiungi all'archivio
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
