@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 interface MatchTabProps {
   prefillTeams?: { team1: string[]; team2: string[] };
-  onMatchCreated?: () => void;
+  onMatchCreated?: (winners: { name: string; avatar?: string }[]) => void;
 }
 
 export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps) {
@@ -21,8 +21,6 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
   const [loading, setLoading] = useState(false);
   const [showVictory, setShowVictory] = useState(false);
   const [winners, setWinners] = useState<{ name: string; avatar?: string }[]>([]);
-
-  console.log('🔄 MatchTab render - showVictory:', showVictory, 'winners:', winners.length);
 
   useEffect(() => {
     loadPlayers();
@@ -46,7 +44,7 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
   function handleCloseVictory() {
     setShowVictory(false);
     // Call refresh AFTER closing modal
-    onMatchCreated?.();
+    onMatchCreated?.([]);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -113,9 +111,6 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
         };
       });
 
-      setWinners(winningPlayers);
-      setShowVictory(true);
-
       // Reset form
       setPlayer1('');
       setPlayer2('');
@@ -124,7 +119,8 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
       setScore1('');
       setScore2('');
 
-      onMatchCreated?.();
+      // Call parent with winners - parent will show modal and refresh
+      onMatchCreated?.(winningPlayers);
     } catch (error) {
       toast.error('Errore nel salvataggio');
     } finally {
