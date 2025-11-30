@@ -22,6 +22,8 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
   const [showVictory, setShowVictory] = useState(false);
   const [winners, setWinners] = useState<{ name: string; avatar?: string }[]>([]);
 
+  console.log('🔄 MatchTab render - showVictory:', showVictory, 'winners:', winners.length);
+
   useEffect(() => {
     loadPlayers();
   }, []);
