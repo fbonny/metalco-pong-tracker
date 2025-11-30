@@ -25,29 +25,18 @@
     
     <script src="https://www.altan.ai/snippet.js"></script>
     
-    <!-- Altan Badge Repositioning -->
+    <!-- Hide Altan Badge -->
     <style>
-      /* Aggressively target any Altan badge elements */
+      /* Hide any Altan badge elements */
+      a[href*="altan.ai"],
       a[href*="altan"],
       div[style*="position: fixed"][style*="bottom"],
       [class*="altan"],
       [id*="altan"] {
-        bottom: auto !important;
-        top: 8px !important;
-        right: 8px !important;
-        left: auto !important;
-        z-index: 40 !important;
-        font-size: 11px !important;
-      }
-      
-      @media (min-width: 640px) {
-        a[href*="altan"],
-        div[style*="position: fixed"][style*="bottom"],
-        [class*="altan"],
-        [id*="altan"] {
-          top: 24px !important;
-          right: 16px !important;
-        }
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
     </style>
   </head>
@@ -55,38 +44,42 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Move Altan badge after DOM loads -->
+    <!-- Hide Altan badge with JavaScript too -->
     <script>
-      // Wait for the badge to be injected
-      function repositionAltanBadge() {
-        // Find all possible Altan badge elements
-        const badges = document.querySelectorAll('a[href*="altan"], [class*="altan"], [id*="altan"]');
+      function hideAltanBadge() {
+        // Find and hide all possible Altan badge elements
+        const selectors = [
+          'a[href*="altan"]',
+          '[class*="altan"]',
+          '[id*="altan"]'
+        ];
         
-        badges.forEach(badge => {
-          const style = window.getComputedStyle(badge);
-          if (style.position === 'fixed' && style.bottom !== 'auto') {
-            // This is likely the badge, reposition it
-            badge.style.bottom = 'auto';
-            badge.style.top = window.innerWidth < 640 ? '8px' : '24px';
-            badge.style.right = window.innerWidth < 640 ? '8px' : '16px';
-            badge.style.left = 'auto';
-            badge.style.zIndex = '40';
-            badge.style.fontSize = '11px';
-          }
+        selectors.forEach(selector => {
+          const elements = document.querySelectorAll(selector);
+          elements.forEach(el => {
+            el.style.display = 'none';
+            el.style.visibility = 'hidden';
+            el.style.opacity = '0';
+            el.style.pointerEvents = 'none';
+          });
         });
       }
       
-      // Try multiple times as the badge might load asynchronously
-      setTimeout(repositionAltanBadge, 100);
-      setTimeout(repositionAltanBadge, 500);
-      setTimeout(repositionAltanBadge, 1000);
-      setTimeout(repositionAltanBadge, 2000);
+      // Try multiple times
+      setTimeout(hideAltanBadge, 0);
+      setTimeout(hideAltanBadge, 100);
+      setTimeout(hideAltanBadge, 500);
+      setTimeout(hideAltanBadge, 1000);
+      setTimeout(hideAltanBadge, 2000);
       
-      // Also watch for DOM changes
+      // Watch for DOM changes
       if (typeof MutationObserver !== 'undefined') {
-        const observer = new MutationObserver(repositionAltanBadge);
+        const observer = new MutationObserver(hideAltanBadge);
         observer.observe(document.body, { childList: true, subtree: true });
       }
+      
+      // Also hide on load
+      window.addEventListener('load', hideAltanBadge);
     </script>
   </body>
 </html>
