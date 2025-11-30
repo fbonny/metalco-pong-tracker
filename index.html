@@ -24,6 +24,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script src="https://www.altan.ai/snippet.js"></script>
+    
+    <!-- Altan Badge Repositioning -->
+    <style>
+      /* Move Altan badge to top right instead of bottom */
+      #altan-badge,
+      [id*="altan"],
+      [class*="altan-badge"] {
+        bottom: auto !important;
+        top: 0.5rem !important;
+        right: 0.5rem !important;
+        left: auto !important;
+        z-index: 40 !important;
+      }
+      
+      /* On larger screens, move it to actual top right */
+      @media (min-width: 640px) {
+        #altan-badge,
+        [id*="altan"],
+        [class*="altan-badge"] {
+          top: 1.5rem !important;
+          right: 1rem !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
