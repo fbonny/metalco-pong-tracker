@@ -44,7 +44,10 @@ export default function TeamMatchupModal({
                 {teamRosso.map((player, index) => (
                   <div
                     key={index}
-                    className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-team-rosso bg-team-rosso/10 flex items-center justify-center"
+                    className={`w-32 h-32 sm:w-40 sm:h-40 border-4 border-team-rosso bg-team-rosso/10 flex items-center justify-center animate-slide-in-left opacity-0 ${
+                      index === 0 ? '' : 'animate-delay-100'
+                    }`}
+                    style={{ animationFillMode: 'forwards' }}
                   >
                     {player.avatar ? (
                       <img 
@@ -64,7 +67,7 @@ export default function TeamMatchupModal({
           </div>
 
           {/* VS */}
-          <div className="text-5xl sm:text-6xl font-bold px-4">
+          <div className="text-5xl sm:text-6xl font-bold px-4 animate-vs-appear opacity-0 animate-delay-300" style={{ animationFillMode: 'forwards' }}>
             VS
           </div>
 
@@ -76,7 +79,10 @@ export default function TeamMatchupModal({
                 {teamBlu.map((player, index) => (
                   <div
                     key={index}
-                    className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-team-blu bg-team-blu/10 flex items-center justify-center"
+                    className={`w-32 h-32 sm:w-40 sm:h-40 border-4 border-team-blu bg-team-blu/10 flex items-center justify-center animate-slide-in-right opacity-0 ${
+                      index === 0 ? '' : 'animate-delay-100'
+                    }`}
+                    style={{ animationFillMode: 'forwards' }}
                   >
                     {player.avatar ? (
                       <img 
@@ -104,8 +110,13 @@ export default function TeamMatchupModal({
               {teamRosso.map((player, index) => (
                 <div 
                   key={index}
-                  className="text-2xl font-bold text-center"
-                  style={{ color: 'hsl(var(--team-rosso))' }}
+                  className={`text-2xl font-bold text-center animate-slide-in-left opacity-0 ${
+                    index === 0 ? 'animate-delay-200' : 'animate-delay-300'
+                  }`}
+                  style={{ 
+                    color: 'hsl(var(--team-rosso))',
+                    animationFillMode: 'forwards'
+                  }}
                 >
                   {player.name}
                 </div>
@@ -122,8 +133,13 @@ export default function TeamMatchupModal({
               {teamBlu.map((player, index) => (
                 <div 
                   key={index}
-                  className="text-2xl font-bold text-center"
-                  style={{ color: 'hsl(var(--team-blu))' }}
+                  className={`text-2xl font-bold text-center animate-slide-in-right opacity-0 ${
+                    index === 0 ? 'animate-delay-200' : 'animate-delay-300'
+                  }`}
+                  style={{ 
+                    color: 'hsl(var(--team-blu))',
+                    animationFillMode: 'forwards'
+                  }}
                 >
                   {player.name}
                 </div>
@@ -133,7 +149,7 @@ export default function TeamMatchupModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 animate-fade-in opacity-0 animate-delay-300" style={{ animationFillMode: 'forwards' }}>
           <button
             onClick={onUseForMatch}
             className="w-full py-4 border-2 border-foreground bg-background text-foreground font-semibold text-lg hover:bg-muted transition-colors"
