@@ -93,6 +93,8 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
 
       await recalculateAllStats();
 
+      toast.success('Partita salvata!');
+
       // Determine winners
       const winningTeam = s1 > s2 ? team1 : team2;
       const winningPlayers = winningTeam.map(name => {
@@ -106,8 +108,6 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
       setWinners(winningPlayers);
       setShowVictory(true);
 
-      toast.success('Partita salvata!');
-
       // Reset form
       setPlayer1('');
       setPlayer2('');
@@ -119,7 +119,6 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
       onMatchCreated?.();
     } catch (error) {
       toast.error('Errore nel salvataggio');
-      console.error(error);
     } finally {
       setLoading(false);
     }
