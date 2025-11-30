@@ -58,10 +58,10 @@ export function compressFamePhoto(file: File, maxSizeMB: number = 1): Promise<st
         let width = img.width;
         let height = img.height;
         
-        // Resize to max 800px width while maintaining aspect ratio (higher quality for Wall of Fame)
-        if (width > 800) {
-          height = (height * 800) / width;
-          width = 800;
+        // Resize to max 600px width (reduced from 800px for smaller file size)
+        if (width > 600) {
+          height = (height * 600) / width;
+          width = 600;
         }
         
         canvas.width = width;
@@ -75,20 +75,25 @@ export function compressFamePhoto(file: File, maxSizeMB: number = 1): Promise<st
         
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Convert to base64 with 0.85 quality (higher quality for Wall of Fame)
-        let quality = 0.85;
+        // Start with lower quality (0.7 instead of 0.85)
+        let quality = 0.7;
         let base64 = canvas.toDataURL('image/jpeg', quality);
         
+        // Target max 500KB for base64 string (more aggressive)
+        const maxBase64Size = 500 * 1024;
+        
         // If still too large, reduce quality iteratively
-        while (base64.length > maxSizeMB * 1024 * 1024 * 1.37 && quality > 0.5) {
+        while (base64.length > maxBase64Size && quality > 0.3) {
           quality -= 0.05;
           base64 = canvas.toDataURL('image/jpeg', quality);
         }
         
-        // Final check
-        const finalSizeMB = base64.length / 1024 / 1024 / 1.37; // Approximate base64 overhead
-        if (finalSizeMB > maxSizeMB) {
-          reject(new Error(`Impossibile comprimere l'immagine sotto ${maxSizeMB}MB. Prova con un'immagine più piccola.`));
+        // Final check - convert base64 length to approximate MB
+        const finalSizeKB = base64.length / 1024;
+        console.log(`Compressed image: ${finalSizeKB.toFixed(0)}KB (quality: ${quality.toFixed(2)})`);
+        
+        if (base64.length > maxBase64Size * 2) {
+          reject(new Error(`Impossibile comprimere l'immagine abbastanza. Prova con un'immagine più piccola o di qualità inferiore.`));
           return;
         }
         
