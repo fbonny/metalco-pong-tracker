@@ -27,24 +27,26 @@
     
     <!-- Altan Badge Repositioning -->
     <style>
-      /* Move Altan badge to top right instead of bottom */
-      #altan-badge,
-      [id*="altan"],
-      [class*="altan-badge"] {
+      /* Aggressively target any Altan badge elements */
+      a[href*="altan"],
+      div[style*="position: fixed"][style*="bottom"],
+      [class*="altan"],
+      [id*="altan"] {
         bottom: auto !important;
-        top: 0.5rem !important;
-        right: 0.5rem !important;
+        top: 8px !important;
+        right: 8px !important;
         left: auto !important;
         z-index: 40 !important;
+        font-size: 11px !important;
       }
       
-      /* On larger screens, move it to actual top right */
       @media (min-width: 640px) {
-        #altan-badge,
-        [id*="altan"],
-        [class*="altan-badge"] {
-          top: 1.5rem !important;
-          right: 1rem !important;
+        a[href*="altan"],
+        div[style*="position: fixed"][style*="bottom"],
+        [class*="altan"],
+        [id*="altan"] {
+          top: 24px !important;
+          right: 16px !important;
         }
       }
     </style>
@@ -52,5 +54,39 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Move Altan badge after DOM loads -->
+    <script>
+      // Wait for the badge to be injected
+      function repositionAltanBadge() {
+        // Find all possible Altan badge elements
+        const badges = document.querySelectorAll('a[href*="altan"], [class*="altan"], [id*="altan"]');
+        
+        badges.forEach(badge => {
+          const style = window.getComputedStyle(badge);
+          if (style.position === 'fixed' && style.bottom !== 'auto') {
+            // This is likely the badge, reposition it
+            badge.style.bottom = 'auto';
+            badge.style.top = window.innerWidth < 640 ? '8px' : '24px';
+            badge.style.right = window.innerWidth < 640 ? '8px' : '16px';
+            badge.style.left = 'auto';
+            badge.style.zIndex = '40';
+            badge.style.fontSize = '11px';
+          }
+        });
+      }
+      
+      // Try multiple times as the badge might load asynchronously
+      setTimeout(repositionAltanBadge, 100);
+      setTimeout(repositionAltanBadge, 500);
+      setTimeout(repositionAltanBadge, 1000);
+      setTimeout(repositionAltanBadge, 2000);
+      
+      // Also watch for DOM changes
+      if (typeof MutationObserver !== 'undefined') {
+        const observer = new MutationObserver(repositionAltanBadge);
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
+    </script>
   </body>
 </html>
