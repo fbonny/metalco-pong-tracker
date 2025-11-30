@@ -41,6 +41,12 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
     setPlayers(data);
   }
 
+  function handleCloseVictory() {
+    setShowVictory(false);
+    // Call refresh AFTER closing modal
+    onMatchCreated?.();
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
@@ -301,7 +307,7 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
           }}>
             TEST MODALE - VINCITORI: {winners.map(w => w.name).join(', ')}
             <br />
-            <button onClick={() => setShowVictory(false)} style={{
+            <button onClick={handleCloseVictory} style={{
               marginTop: '20px',
               padding: '20px',
               fontSize: '30px',
