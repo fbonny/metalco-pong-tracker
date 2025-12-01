@@ -39,6 +39,7 @@ export default function Home() {
   }
 
   function handleMatchCreated(winners: { name: string; avatar?: string }[]) {
+    alert('🎉 VICTORY! Winners: ' + winners.map(w => w.name).join(', '));
     setVictoryWinners(winners);
   }
 
