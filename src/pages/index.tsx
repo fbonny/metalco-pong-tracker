@@ -11,7 +11,6 @@ import WallOfFameTab from '@/components/tabs/WallOfFameTab';
 import PlayerProfileModal from '@/components/modals/PlayerProfileModal';
 import EditMatchModal from '@/components/modals/EditMatchModal';
 import StatsModal from '@/components/modals/StatsModal';
-import VictoryModal from '@/components/modals/VictoryModal';
 import { Player, Match } from '@/lib/database';
 import { checkAndIncrementLeaderDays } from '@/lib/leaderDaysTracker';
 import { useEffect } from 'react';
@@ -24,10 +23,6 @@ export default function Home() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
   const [statsType, setStatsType] = useState<'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair' | null>(null);
-  const [victoryWinners, setVictoryWinners] = useState<{ name: string; avatar?: string }[]>([
-    { name: 'TEST PLAYER 1', avatar: '' },
-    { name: 'TEST PLAYER 2', avatar: '' }
-  ]); // FORCE SHOW MODAL FOR TEST
   
   // Team generator prefill
   const [teamsPrefill, setTeamsPrefill] = useState<{ team1: string[]; team2: string[] } | undefined>();
@@ -39,16 +34,6 @@ export default function Home() {
 
   function handleRefresh() {
     setRefreshKey(k => k + 1);
-  }
-
-  function handleMatchCreated(winners: { name: string; avatar?: string }[]) {
-    alert('🎉 VICTORY! Winners: ' + winners.map(w => w.name).join(', '));
-    setVictoryWinners(winners);
-  }
-
-  function handleCloseVictory() {
-    setVictoryWinners([]);
-    handleRefresh();
   }
 
   function handleUseTeamsForMatch(teams: { team1: string[]; team2: string[] }) {
