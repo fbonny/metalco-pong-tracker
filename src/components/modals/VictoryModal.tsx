@@ -1,5 +1,3 @@
-import { X } from 'lucide-react';
-
 interface VictoryModalProps {
   winners: { name: string; avatar?: string }[];
   onClose: () => void;
@@ -8,71 +6,55 @@ interface VictoryModalProps {
 export default function VictoryModal({ winners, onClose }: VictoryModalProps) {
   return (
     <div
-      className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(255, 0, 0, 0.95)',
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px'
+      }}
       onClick={onClose}
     >
       <div
-        className="bg-white text-black border-4 border-yellow-500 max-w-2xl w-full p-8 relative"
+        style={{
+          backgroundColor: 'white',
+          border: '8px solid blue',
+          maxWidth: '600px',
+          width: '100%',
+          padding: '40px',
+          position: 'relative',
+          textAlign: 'center'
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
+        <h1 style={{ fontSize: '80px', fontWeight: 'bold', color: 'green', margin: 0 }}>
+          WIN!
+        </h1>
+        <p style={{ fontSize: '24px', marginTop: '20px', color: 'black' }}>
+          VINCITORI: {winners.map(w => w.name).join(' & ')}
+        </p>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 bg-red-500 text-white"
+          style={{
+            marginTop: '40px',
+            padding: '20px 40px',
+            fontSize: '24px',
+            backgroundColor: 'orange',
+            color: 'white',
+            border: '4px solid black',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            width: '100%'
+          }}
         >
-          <X className="w-6 h-6" />
+          CHIUDI MODALE
         </button>
-
-        {/* WIN Text */}
-        <div className="text-center mb-8">
-          <div className="text-8xl font-bold text-yellow-500">
-            WIN!
-          </div>
-          <div className="text-xl font-semibold mt-2">
-            Victory!
-          </div>
-        </div>
-
-        {/* Winners Photos */}
-        <div className="flex items-center justify-center gap-4 mb-6">
-          {winners.map((winner, index) => (
-            <div key={index}>
-              <div className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-yellow-500 bg-yellow-100 flex items-center justify-center">
-                {winner.avatar ? (
-                  <img
-                    src={winner.avatar}
-                    alt={winner.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="text-4xl font-bold text-yellow-600">
-                    {winner.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Winners Names */}
-        <div className="text-center">
-          <div className="text-3xl font-bold text-yellow-600 uppercase mb-2">
-            {winners.map(w => w.name).join(' & ')}
-          </div>
-          <div className="text-sm text-gray-600 uppercase">
-            {winners.length === 1 ? 'Champion' : 'Champions'}
-          </div>
-        </div>
-
-        {/* Continue Button */}
-        <div className="mt-8">
-          <button
-            onClick={onClose}
-            className="w-full py-4 bg-yellow-500 text-black border-4 border-yellow-600 font-bold text-lg uppercase"
-          >
-            Continua
-          </button>
-        </div>
       </div>
     </div>
   );
