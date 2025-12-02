@@ -22,7 +22,7 @@ export default function Home() {
   // Modal states
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
-  const [statsType, setStatsType] = useState<'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair' | null>(null);
+  const [statsType, setStatsType] = useState<'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair' | 'singlesRank' | null>(null);
   
   // Team generator prefill
   const [teamsPrefill, setTeamsPrefill] = useState<{ team1: string[]; team2: string[] } | undefined>();
