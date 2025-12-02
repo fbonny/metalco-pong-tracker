@@ -28,7 +28,7 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Classifica</h2>
+      <h2 className="text-2xl font-semibold mb-6">Classifica 🏓</h2>
       
       <div className="space-y-2">
         {players.map((player, index) => {
@@ -47,11 +47,9 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
                 {rank}
               </div>
               
-              <button 
-                className="flex-shrink-0 hover:opacity-80 transition-opacity"
-              >
+              <div className="flex-shrink-0">
                 <PlayerAvatar name={player.name} avatar={player.avatar} size="sm" />
-              </button>
+              </div>
               
               <div className="flex-1 min-w-0">
                 <div className="font-semibold flex items-center gap-2 flex-wrap">
@@ -82,22 +80,20 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
                 {formatPoints(player.points)}
               </div>
 
-              {/* Profile button */}
               <button
                 onClick={() => onPlayerClick(player)}
                 className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors flex-shrink-0"
                 title="Profilo"
               >
-                <Info className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Info className="w-5 h-5" />
               </button>
 
-              {/* Stats button */}
               <button
                 onClick={() => onStatsClick(player)}
                 className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors flex-shrink-0"
                 title="Statistiche"
               >
-                <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
+                <BarChart3 className="w-5 h-5" />
               </button>
             </div>
           );
