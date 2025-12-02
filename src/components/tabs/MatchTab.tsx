@@ -43,11 +43,6 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
     setMatches(matchesData);
   }
 
-  async function loadPlayers() {
-    const data = await getPlayers();
-    setPlayers(data);
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
@@ -119,16 +114,15 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
     }
   }
 
-  const availablePlayers = players.filter(p =>
-    !isDouble
-      ? ![player1, player2].includes(p.name)
-      : ![player1, player2, player3, player4].includes(p.name)
-  );
-
-  // Get player objects for prediction (only for singles matches)
-  const selectedPlayer1 = !isDouble && player1 ? players.find(p => p.name === player1) : null;
-  const selectedPlayer2 = !isDouble && player2 ? players.find(p => p.name === player2) : null;
-  const showPredictor = selectedPlayer1 && selectedPlayer2 && !isDouble;
+  // Get player objects for prediction
+  const selectedPlayer1 = player1 ? players.find(p => p.name === player1) : null;
+  const selectedPlayer2 = player2 ? players.find(p => p.name === player2) : null;
+  const selectedPlayer3 = player3 ? players.find(p => p.name === player3) : null;
+  const selectedPlayer4 = player4 ? players.find(p => p.name === player4) : null;
+  
+  const showPredictor = isDouble
+    ? !!(selectedPlayer1 && selectedPlayer2 && selectedPlayer3 && selectedPlayer4)
+    : !!(selectedPlayer1 && selectedPlayer2);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -157,13 +151,18 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
         </button>
       </div>
 
-      {/* Match Predictor Card - Shows when both players selected in singles */}
+      {/* Match Predictor Card */}
       {showPredictor && (
         <MatchPredictorCard
-          player1={selectedPlayer1}
-          player2={selectedPlayer2}
+          player1={!isDouble ? selectedPlayer1! : undefined}
+          player2={!isDouble ? selectedPlayer2! : undefined}
+          team1Player1={isDouble ? selectedPlayer1! : undefined}
+          team1Player2={isDouble ? selectedPlayer2! : undefined}
+          team2Player1={isDouble ? selectedPlayer3! : undefined}
+          team2Player2={isDouble ? selectedPlayer4! : undefined}
           matches={matches}
           onClick={() => setShowPredictorModal(true)}
+          isDouble={isDouble}
         />
       )}
 
