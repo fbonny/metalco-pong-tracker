@@ -47,9 +47,23 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
     const selectedFour = shuffled.slice(0, 4);
     console.log('✂️ Presi primi 4 giocatori:', selectedFour);
 
-    // Split into two teams of 2 players each
-    const teamBlu = selectedFour.slice(0, 2);
-    const teamRosso = selectedFour.slice(2, 4);
+    let teamBlu: string[];
+    let teamRosso: string[];
+
+    // Special pairing logic
+    const hasFederico = selectedFour.includes('Federico');
+    const hasRebecca = selectedFour.includes('Rebecca');
+    
+    if (hasFederico && hasRebecca && Math.random() < 0.8) {
+      // Pair them together
+      const others = selectedFour.filter(p => p !== 'Federico' && p !== 'Rebecca');
+      teamBlu = ['Federico', 'Rebecca'];
+      teamRosso = others;
+    } else {
+      // Normal split
+      teamBlu = selectedFour.slice(0, 2);
+      teamRosso = selectedFour.slice(2, 4);
+    }
 
     console.log('🔵 Team Blu:', teamBlu);
     console.log('🔴 Team Rosso:', teamRosso);

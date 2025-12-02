@@ -238,6 +238,15 @@ export default function InfoTab({ onPlayerCreated }: InfoTabProps) {
             </p>
           </div>
         </div>
+
+        <div className="border-2 border-foreground p-6 bg-muted">
+          <h3 className="text-xl font-semibold mb-3">⛅ Condizioni Meteo</h3>
+          <div className="space-y-2 text-muted-foreground">
+            <p>
+              Poiché le partite si svolgono all'aperto, in caso di <strong className="text-foreground">condizioni meteo non ideali</strong>, solo il creatore <strong className="text-foreground">Federico B.</strong> può decretare se la partita può ritenersi <strong className="text-foreground">valida per la classifica</strong> o no.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
