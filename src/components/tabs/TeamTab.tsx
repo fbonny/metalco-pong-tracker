@@ -20,7 +20,9 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
 
   async function loadPlayers() {
     const data = await getPlayers();
-    setPlayers(data);
+    // Ordina alfabeticamente per nome
+    const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
+    setPlayers(sortedData);
   }
 
   function togglePlayer(name: string) {
