@@ -400,8 +400,8 @@ export function calculateAdvancedStats(
     .slice(0, 3);
 
   return {
-    nemesis: nemesis && nemesis.losses > 0 ? nemesis : null,
-    victim: victim && victim.wins > 0 ? victim : null,
+    nemesis,
+    victim,
     recentForm,
     bestStreak,
     currentStreak,
@@ -410,5 +410,219 @@ export function calculateAdvancedStats(
     singoloMatches: singoloMatches.length,
     doppioMatches: doppioMatches.length,
     balancedRivalries,
+  };
+}
+
+/* ==================== Double Prediction ==================== */
+
+export interface DoublePrediction {
+  team1WinProbability: number;
+  team2WinProbability: number;
+  team1PairStats: { matches: number; wins: number; winRate: number };
+  team2PairStats: { matches: number; wins: number; winRate: number };
+  headToHeadMatches: number;
+  insights: string[];
+}
+
+/**
+ * Calculate pair statistics (how often 2 players played together and their win rate)
+ */
+function getPairStats(player1: string, player2: string, matches: Match[]): { matches: number; wins: number; winRate: number } {
+  const pairMatches = matches.filter(match => {
+    if (!match.is_double) return false;
+    
+    // Check if both players are in the same team
+    const bothInTeam1 = match.team1.includes(player1) && match.team1.includes(player2);
+    const bothInTeam2 = match.team2.includes(player1) && match.team2.includes(player2);
+    
+    return bothInTeam1 || bothInTeam2;
+  });
+
+  const wins = pairMatches.filter(match => {
+    const winner = match.score1 > match.score2;
+    const winningTeam = winner ? match.team1 : match.team2;
+    return winningTeam.includes(player1);
+  }).length;
+
+  const winRate = pairMatches.length > 0 ? (wins / pairMatches.length) * 100 : 50;
+
+  return {
+    matches: pairMatches.length,
+    wins,
+    winRate,
+  };
+}
+
+/**
+ * Calculate head-to-head for two pairs
+ */
+function getPairHeadToHead(
+  team1Player1: string,
+  team1Player2: string,
+  team2Player1: string,
+  team2Player2: string,
+  matches: Match[]
+): { matches: number; team1Wins: number; team2Wins: number } {
+  const h2hMatches = matches.filter(match => {
+    if (!match.is_double) return false;
+    
+    // Check if team1 pair played against team2 pair
+    const team1Set = new Set([team1Player1, team1Player2]);
+    const team2Set = new Set([team2Player1, team2Player2]);
+    
+    const matchTeam1 = new Set(match.team1);
+    const matchTeam2 = new Set(match.team2);
+    
+    // Check if team1 set matches either matchTeam1 or matchTeam2
+    const team1IsMatchTeam1 = team1Set.size === matchTeam1.size && [...team1Set].every(p => matchTeam1.has(p));
+    const team1IsMatchTeam2 = team1Set.size === matchTeam2.size && [...team1Set].every(p => matchTeam2.has(p));
+    
+    const team2IsMatchTeam1 = team2Set.size === matchTeam1.size && [...team2Set].every(p => matchTeam1.has(p));
+    const team2IsMatchTeam2 = team2Set.size === matchTeam2.size && [...team2Set].every(p => matchTeam2.has(p));
+    
+    return (team1IsMatchTeam1 && team2IsMatchTeam2) || (team1IsMatchTeam2 && team2IsMatchTeam1);
+  });
+
+  let team1Wins = 0;
+  let team2Wins = 0;
+
+  h2hMatches.forEach(match => {
+    const winner = match.score1 > match.score2;
+    const winningTeam = winner ? match.team1 : match.team2;
+    
+    if (winningTeam.includes(team1Player1)) {
+      team1Wins++;
+    } else {
+      team2Wins++;
+    }
+  });
+
+  return {
+    matches: h2hMatches.length,
+    team1Wins,
+    team2Wins,
+  };
+}
+
+/**
+ * Calculate win probability for doubles match
+ */
+export function calculateDoubleProbability(
+  team1Player1Name: string,
+  team1Player2Name: string,
+  team2Player1Name: string,
+  team2Player2Name: string,
+  allPlayers: Player[],
+  matches: Match[]
+): DoublePrediction {
+  const team1P1 = allPlayers.find(p => p.name === team1Player1Name);
+  const team1P2 = allPlayers.find(p => p.name === team1Player2Name);
+  const team2P1 = allPlayers.find(p => p.name === team2Player1Name);
+  const team2P2 = allPlayers.find(p => p.name === team2Player2Name);
+
+  // Get pair statistics
+  const team1PairStats = getPairStats(team1Player1Name, team1Player2Name, matches);
+  const team2PairStats = getPairStats(team2Player1Name, team2Player2Name, matches);
+
+  // Get head-to-head between the two pairs
+  const pairH2H = getPairHeadToHead(
+    team1Player1Name, team1Player2Name,
+    team2Player1Name, team2Player2Name,
+    matches
+  );
+
+  let team1Score = 0;
+  let team2Score = 0;
+
+  // 1. Pair synergy weight (40%)
+  const pairWeight = 0.4;
+  team1Score += (team1PairStats.winRate / 100) * pairWeight;
+  team2Score += (team2PairStats.winRate / 100) * pairWeight;
+
+  // 2. Head-to-head between pairs (30%)
+  const h2hWeight = 0.3;
+  if (pairH2H.matches > 0) {
+    team1Score += (pairH2H.team1Wins / pairH2H.matches) * h2hWeight;
+    team2Score += (pairH2H.team2Wins / pairH2H.matches) * h2hWeight;
+  } else {
+    team1Score += h2hWeight * 0.5;
+    team2Score += h2hWeight * 0.5;
+  }
+
+  // 3. Individual win rates in doubles (30%)
+  const individualWeight = 0.3;
+  
+  const getDoubleWinRate = (playerName: string): number => {
+    const playerDoubles = matches.filter(m => {
+      if (!m.is_double) return false;
+      return m.team1.includes(playerName) || m.team2.includes(playerName);
+    });
+    
+    if (playerDoubles.length === 0) return 0.5;
+    
+    const wins = playerDoubles.filter(m => {
+      const winner = m.score1 > m.score2;
+      const winningTeam = winner ? m.team1 : m.team2;
+      return winningTeam.includes(playerName);
+    }).length;
+    
+    return wins / playerDoubles.length;
+  };
+
+  const team1AvgWinRate = (getDoubleWinRate(team1Player1Name) + getDoubleWinRate(team1Player2Name)) / 2;
+  const team2AvgWinRate = (getDoubleWinRate(team2Player1Name) + getDoubleWinRate(team2Player2Name)) / 2;
+
+  team1Score += team1AvgWinRate * individualWeight;
+  team2Score += team2AvgWinRate * individualWeight;
+
+  // Normalize to percentages
+  const totalScore = team1Score + team2Score;
+  const team1WinProbability = (team1Score / totalScore) * 100;
+  const team2WinProbability = (team2Score / totalScore) * 100;
+
+  // Generate insights
+  const insights: string[] = [];
+
+  // Pair synergy insights
+  if (team1PairStats.matches > 0) {
+    insights.push(
+      `${team1Player1Name}-${team1Player2Name}: ${team1PairStats.winRate.toFixed(0)}% vittorie in ${team1PairStats.matches} match insieme`
+    );
+  } else {
+    insights.push(`${team1Player1Name}-${team1Player2Name}: prima volta insieme`);
+  }
+
+  if (team2PairStats.matches > 0) {
+    insights.push(
+      `${team2Player1Name}-${team2Player2Name}: ${team2PairStats.winRate.toFixed(0)}% vittorie in ${team2PairStats.matches} match insieme`
+    );
+  } else {
+    insights.push(`${team2Player1Name}-${team2Player2Name}: prima volta insieme`);
+  }
+
+  // Head-to-head insight
+  if (pairH2H.matches > 0) {
+    insights.push(
+      `Queste coppie si sono già affrontate ${pairH2H.matches} ${pairH2H.matches === 1 ? 'volta' : 'volte'} (${pairH2H.team1Wins}-${pairH2H.team2Wins})`
+    );
+  }
+
+  // Cross-matchup insights (individual h2h between players from different teams)
+  const crossH2H = calculateHeadToHead(team1Player1Name, team2Player1Name, matches);
+  if (crossH2H.totalMatches >= 3) {
+    if (crossH2H.player1Wins > crossH2H.player2Wins) {
+      insights.push(`${team1Player1Name} domina contro ${team2Player1Name} (${crossH2H.player1Wins}-${crossH2H.player2Wins})`);
+    } else if (crossH2H.player2Wins > crossH2H.player1Wins) {
+      insights.push(`${team2Player1Name} domina contro ${team1Player1Name} (${crossH2H.player2Wins}-${crossH2H.player1Wins})`);
+    }
+  }
+
+  return {
+    team1WinProbability,
+    team2WinProbability,
+    team1PairStats,
+    team2PairStats,
+    headToHeadMatches: pairH2H.matches,
+    insights: insights.slice(0, 3),
   };
 }
