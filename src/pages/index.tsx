@@ -77,7 +77,7 @@ export default function Home() {
         {activeTab === 'walloffame' && (
           <WallOfFameTab onPlayerClick={setSelectedPlayer} />
         )}
-        {activeTab === 'info' && <InfoTab />}
+        {activeTab === 'info' && <InfoTab onPlayerCreated={handleRefresh} />}
       </main>
 
       {/* Bottom Navigation */}
