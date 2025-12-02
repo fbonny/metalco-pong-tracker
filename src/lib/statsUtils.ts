@@ -282,18 +282,18 @@ export function calculateAdvancedStats(
   // Get all matchups
   const matchups = getPlayerMatchups(playerName, matches, allPlayerNames);
 
-  // Find nemesis (most losses against)
+  // Find nemesis (most losses against) - filter out those with 0 losses first
   const nemesis = matchups.length > 0
-    ? matchups.reduce((prev, current) => 
-        current.losses > prev.losses ? current : prev
-      )
+    ? matchups
+        .filter(m => m.losses > 0)
+        .sort((a, b) => b.losses - a.losses)[0] || null
     : null;
 
-  // Find victim (most wins against)
+  // Find victim (most wins against) - filter out those with 0 wins first
   const victim = matchups.length > 0
-    ? matchups.reduce((prev, current) => 
-        current.wins > prev.wins ? current : prev
-      )
+    ? matchups
+        .filter(m => m.wins > 0)
+        .sort((a, b) => b.wins - a.wins)[0] || null
     : null;
 
   // Recent form by period
