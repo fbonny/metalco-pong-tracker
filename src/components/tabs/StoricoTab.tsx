@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 interface StoricoTabProps {
   onEditMatch: (match: Match) => void;
-  onStatsClick: (type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair') => void;
+  onStatsClick: (type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair' | 'singlesRank') => void;
 }
 
 interface MatchesByDay {
@@ -125,7 +125,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-semibold mb-6">Storico Partite</h2>
       
-      {/* Stats Cards - Updated */}
+      {/* Stats Cards - 3x3 Grid */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <button
           onClick={() => onStatsClick('leader')}
@@ -191,10 +191,21 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         </button>
 
         <button
-          onClick={() => onStatsClick('mostPlayedPair')}
-          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left col-span-3"
+          onClick={() => onStatsClick('singlesRank')}
+          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
         >
-          <div className="text-xs text-muted-foreground mb-1">Coppia Più Ricorrente</div>
+          <div className="text-xs text-muted-foreground mb-1">Classifica Singolo</div>
+          <div className="flex items-center gap-2">
+            <Trophy className="w-5 h-5" />
+            <span className="text-sm font-medium">Vedi Stats</span>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onStatsClick('mostPlayedPair')}
+          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
+        >
+          <div className="text-xs text-muted-foreground mb-1">Coppia Frequente</div>
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5" />
             <span className="text-sm font-medium">Vedi Stats</span>
@@ -203,7 +214,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
 
         <button
           onClick={() => onStatsClick('twoWeeks')}
-          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left col-span-3"
+          className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
         >
           <div className="text-xs text-muted-foreground mb-1">Top e Flop - 14gg</div>
           <div className="flex items-center gap-2">
