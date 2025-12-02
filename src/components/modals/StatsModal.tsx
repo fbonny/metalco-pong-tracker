@@ -5,7 +5,7 @@ import PlayerAvatar from '@/components/PlayerAvatar';
 import { Trophy, Target, Flame, TrendingUp, TrendingDown, TrendingUpDown, Users, X } from 'lucide-react';
 
 interface StatsModalProps {
-  type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair';
+  type: 'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair' | 'singlesRank';
   onClose: () => void;
 }
 
@@ -118,6 +118,52 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
       return getMostPlayedPairs();
     }
 
+    if (type === 'singlesRank') {
+      // Calculate singles-only ranking
+      const singlesStats = new Map<string, { wins: number; losses: number; points: number }>();
+      
+      // Initialize all players
+      players.forEach(p => {
+        singlesStats.set(p.name, { wins: 0, losses: 0, points: 0 });
+      });
+      
+      // Process only singles matches
+      matches
+        .filter(m => !m.is_double)
+        .forEach(match => {
+          const winner = match.score1 > match.score2 ? match.team1[0] : match.team2[0];
+          const loser = match.score1 > match.score2 ? match.team2[0] : match.team1[0];
+          const wScore = Math.max(match.score1, match.score2);
+          const lScore = Math.min(match.score1, match.score2);
+          const pts = calculateMatchPoints(wScore, lScore);
+          
+          if (singlesStats.has(winner)) {
+            const stats = singlesStats.get(winner)!;
+            stats.wins++;
+            stats.points += pts.winner;
+          }
+          
+          if (singlesStats.has(loser)) {
+            const stats = singlesStats.get(loser)!;
+            stats.losses++;
+            stats.points += pts.loser;
+          }
+        });
+      
+      // Convert to array and sort by points, then wins
+      return Array.from(singlesStats.entries())
+        .map(([name, stats]) => {
+          const player = players.find(p => p.name === name)!;
+          return {
+            player: { ...player, wins: stats.wins, losses: stats.losses, points: stats.points },
+            value: stats.points,
+          };
+        })
+        .filter(p => p.player.wins + p.player.losses > 0) // Only show players who played singles
+        .sort((a, b) => b.value - a.value || b.player.wins - a.player.wins)
+        .slice(0, 10);
+    }
+
     if (type === 'winStreak') {
       // Calculate MAXIMUM consecutive WINS across entire history
       return players
@@ -228,6 +274,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
     lossRate: 'Peggior % Sconfitte',
     twoWeeks: 'Top e Flop - 14gg',
     mostPlayedPair: 'Coppia Più Ricorrente',
+    singlesRank: 'Classifica Singoli',
   };
 
   const IconComponent = {
@@ -239,6 +286,7 @@ export default function StatsModal({ type, onClose }: StatsModalProps) {
     lossRate: TrendingDown,
     twoWeeks: TrendingUpDown,
     mostPlayedPair: Users,
+    singlesRank: Trophy,
   }[type];
 
   function formatValue(value: number, playerIndex: number) {
