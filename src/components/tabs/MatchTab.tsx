@@ -35,9 +35,7 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
 
   async function loadPlayers() {
     const data = await getPlayers();
-    // Ordina alfabeticamente per nome
-    const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
-    setPlayers(sortedData);
+    setPlayers(data);
   }
 
   async function handleSubmit(e: React.FormEvent) {

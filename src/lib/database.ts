@@ -71,7 +71,7 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 
 // Players
 export async function getPlayers(): Promise<Player[]> {
-  return fetchAPI('players?order=points.desc,wins.desc');
+  return fetchAPI('players?order=name.asc');
 }
 
 export async function createPlayer(player: Partial<Player>): Promise<Player> {
