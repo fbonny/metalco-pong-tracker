@@ -53,18 +53,28 @@ export function calculateHeadToHead(
   const h2hMatches = matches.filter(match => {
     const team1Players = match.team1;
     const team2Players = match.team2;
-    const allPlayers = [...team1Players, ...team2Players];
     
-    // For singles: both players must be in the match
-    if (!match.is_double) {
-      return allPlayers.includes(player1Name) && allPlayers.includes(player2Name);
+    // Check if both players are in the match
+    const p1InMatch = team1Players.includes(player1Name) || team2Players.includes(player1Name);
+    const p2InMatch = team1Players.includes(player2Name) || team2Players.includes(player2Name);
+    
+    if (!p1InMatch || !p2InMatch) {
+      return false; // One or both players not in this match
     }
     
-    // For doubles: players must be on opposite teams
-    const p1InTeam1 = team1Players.includes(player1Name);
-    const p2InTeam1 = team1Players.includes(player2Name);
+    // For singles: must be a 1v1 match
+    if (!match.is_double) {
+      return team1Players.includes(player1Name) && team2Players.includes(player2Name);
+    }
     
-    return (p1InTeam1 && !p2InTeam1) || (!p1InTeam1 && p2InTeam1);
+    // For doubles: players MUST be on OPPOSITE teams
+    const p1InTeam1 = team1Players.includes(player1Name);
+    const p2InTeam1 = team2Players.includes(player2Name);
+    const p1InTeam2 = team2Players.includes(player1Name);
+    const p2InTeam2 = team1Players.includes(player2Name);
+    
+    // p1 in team1 AND p2 in team2, OR p1 in team2 AND p2 in team1
+    return (p1InTeam1 && p2InTeam2) || (p1InTeam2 && p2InTeam1);
   });
 
   let player1Wins = 0;
