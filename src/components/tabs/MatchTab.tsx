@@ -35,7 +35,9 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
 
   async function loadPlayers() {
     const data = await getPlayers();
-    setPlayers(data);
+    // Ordina alfabeticamente per nome
+    const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
+    setPlayers(sortedData);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -176,9 +178,9 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
                     .filter(p => ![player1, player3, player4].includes(p.name))
                     .map(p => (
                       <option key={p.id} value={p.name}>
-                        {p.name}
-                      </option>
-                    ))}
+                      {p.name}
+                    </option>
+                  ))}
                 </select>
               )}
 
