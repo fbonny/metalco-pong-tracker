@@ -62,16 +62,16 @@ export function calculateHeadToHead(
       return false; // One or both players not in this match
     }
     
-    // For singles: must be a 1v1 match
+    // For singles: must be a 1v1 match  
     if (!match.is_double) {
       return team1Players.includes(player1Name) && team2Players.includes(player2Name);
     }
     
     // For doubles: players MUST be on OPPOSITE teams
     const p1InTeam1 = team1Players.includes(player1Name);
-    const p2InTeam1 = team2Players.includes(player2Name);
+    const p2InTeam1 = team1Players.includes(player2Name);
     const p1InTeam2 = team2Players.includes(player1Name);
-    const p2InTeam2 = team1Players.includes(player2Name);
+    const p2InTeam2 = team2Players.includes(player2Name);
     
     // p1 in team1 AND p2 in team2, OR p1 in team2 AND p2 in team1
     return (p1InTeam1 && p2InTeam2) || (p1InTeam2 && p2InTeam1);
