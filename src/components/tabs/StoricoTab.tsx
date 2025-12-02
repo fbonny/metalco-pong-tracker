@@ -147,12 +147,12 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         </button>
         
         <button
-          onClick={() => onStatsClick('winStreak')}
+          onClick={() => onStatsClick('singlesRank')}
           className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
         >
-          <div className="text-xs text-muted-foreground mb-1">Miglior Striscia</div>
+          <div className="text-xs text-muted-foreground mb-1">Classifica Singolo</div>
           <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-green-500" />
+            <Trophy className="w-5 h-5" />
             <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
@@ -191,12 +191,12 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
         </button>
 
         <button
-          onClick={() => onStatsClick('singlesRank')}
+          onClick={() => onStatsClick('winStreak')}
           className="p-4 border-2 border-foreground hover:bg-muted transition-colors text-left"
         >
-          <div className="text-xs text-muted-foreground mb-1">Classifica Singolo</div>
+          <div className="text-xs text-muted-foreground mb-1">Miglior Striscia</div>
           <div className="flex items-center gap-2">
-            <Trophy className="w-5 h-5" />
+            <Flame className="w-5 h-5 text-green-500" />
             <span className="text-sm font-medium">Vedi Stats</span>
           </div>
         </button>
