@@ -16,7 +16,9 @@ export default function RankTab({ onPlayerClick }: RankTabProps) {
 
   async function loadPlayers() {
     const data = await getPlayers();
-    setPlayers(data);
+    // Ordina per ranking (punti desc, poi vittorie desc) - crea una copia per non modificare l'originale
+    const ranked = [...data].sort((a, b) => b.points - a.points || b.wins - a.wins);
+    setPlayers(ranked);
   }
 
   return (
