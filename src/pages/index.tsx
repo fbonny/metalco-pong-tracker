@@ -9,6 +9,7 @@ import StoricoTab from '@/components/tabs/StoricoTab';
 import InfoTab from '@/components/tabs/InfoTab';
 import WallOfFameTab from '@/components/tabs/WallOfFameTab';
 import PlayerProfileModal from '@/components/modals/PlayerProfileModal';
+import PlayerStatsModal from '@/components/modals/PlayerStatsModal';
 import EditMatchModal from '@/components/modals/EditMatchModal';
 import StatsModal from '@/components/modals/StatsModal';
 import { Player, Match } from '@/lib/database';
@@ -19,15 +20,13 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('match');
   const [refreshKey, setRefreshKey] = useState(0);
   
-  // Modal states
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedPlayerStats, setSelectedPlayerStats] = useState<Player | null>(null);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
   const [statsType, setStatsType] = useState<'leader' | 'matches' | 'winStreak' | 'lossStreak' | 'winRate' | 'lossRate' | 'twoWeeks' | 'mostPlayedPair' | 'singlesRank' | null>(null);
   
-  // Team generator prefill
   const [teamsPrefill, setTeamsPrefill] = useState<{ team1: string[]; team2: string[] } | undefined>();
 
-  // Check and increment leader days on app load
   useEffect(() => {
     checkAndIncrementLeaderDays();
   }, []);
@@ -39,7 +38,6 @@ export default function Home() {
   function handleUseTeamsForMatch(teams: { team1: string[]; team2: string[] }) {
     setTeamsPrefill(teams);
     setActiveTab('match');
-    // Clear prefill after a short delay
     setTimeout(() => setTeamsPrefill(undefined), 100);
   }
 
@@ -47,14 +45,12 @@ export default function Home() {
     <div className="min-h-screen bg-background pb-20">
       <Toaster position="top-center" />
       
-      {/* Header */}
       <header className="border-b-2 border-foreground py-6 px-4 mb-8">
         <div className="text-center">
           <Logo />
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="px-4" key={refreshKey}>
         {activeTab === 'match' && (
           <MatchTab 
@@ -63,7 +59,10 @@ export default function Home() {
           />
         )}
         {activeTab === 'rank' && (
-          <RankTab onPlayerClick={setSelectedPlayer} />
+          <RankTab 
+            onPlayerClick={setSelectedPlayer}
+            onStatsClick={setSelectedPlayerStats}
+          />
         )}
         {activeTab === 'team' && (
           <TeamTab onUseForMatch={handleUseTeamsForMatch} />
@@ -80,10 +79,8 @@ export default function Home() {
         {activeTab === 'info' && <InfoTab onPlayerCreated={handleRefresh} />}
       </main>
 
-      {/* Bottom Navigation */}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Modals */}
       {selectedPlayer && (
         <PlayerProfileModal
           player={selectedPlayer}
@@ -92,6 +89,13 @@ export default function Home() {
             setSelectedPlayer(null);
             handleRefresh();
           }}
+        />
+      )}
+
+      {selectedPlayerStats && (
+        <PlayerStatsModal
+          player={selectedPlayerStats}
+          onClose={() => setSelectedPlayerStats(null)}
         />
       )}
 
