@@ -247,6 +247,15 @@ export default function InfoTab({ onPlayerCreated }: InfoTabProps) {
             </p>
           </div>
         </div>
+
+        <div className="border-2 border-red-500 p-6 bg-red-500/10">
+          <h3 className="text-xl font-semibold mb-3 text-red-600">🏓 Regola Racchetta</h3>
+          <div className="space-y-2 text-muted-foreground">
+            <p>
+              Chi usa la <strong className="text-foreground">racchetta personale di Federico</strong> in assenza di chiaro permesso di concessione, avrà <strong className="text-red-600">50 punti di penalità</strong>.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
