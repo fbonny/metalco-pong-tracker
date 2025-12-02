@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Player, getPlayers } from '@/lib/database';
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
+import { BarChart3 } from 'lucide-react';
 
 interface RankTabProps {
   onPlayerClick: (player: Player) => void;
@@ -36,13 +37,12 @@ export default function RankTab({ onPlayerClick }: RankTabProps) {
           const last10 = player.history.slice(-10);
           
           return (
-            <button
+            <div
               key={player.id}
-              onClick={() => onPlayerClick(player)}
-              className={`w-full flex items-center gap-4 p-4 border-2 transition-all ${
+              className={`w-full flex items-center gap-4 p-4 border-2 ${
                 isLeader
                   ? 'border-gold bg-gold/10 leader-glow'
-                  : 'border-foreground hover:bg-muted'
+                  : 'border-foreground'
               }`}
             >
               <div className={`text-2xl font-bold w-12 text-center ${isLeader ? 'text-gold' : ''}`}>
@@ -59,6 +59,14 @@ export default function RankTab({ onPlayerClick }: RankTabProps) {
                       LEADER
                     </span>
                   )}
+                  {/* Stats button */}
+                  <button
+                    onClick={() => onPlayerClick(player)}
+                    className="p-1.5 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors ml-2"
+                    title="Vedi Statistiche"
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                  </button>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {player.wins}V - {player.losses}S
@@ -82,7 +90,7 @@ export default function RankTab({ onPlayerClick }: RankTabProps) {
               <div className={`text-2xl font-bold ${isLeader ? 'text-gold' : ''}`}>
                 {formatPoints(player.points)}
               </div>
-            </button>
+            </div>
           );
         })}
       </div>
