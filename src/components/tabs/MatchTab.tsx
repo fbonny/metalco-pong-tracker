@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Player, getPlayers, createMatch, recalculateAllStats } from '@/lib/database';
+import { Player, getPlayers, createMatch, recalculateAllStats, Match, getMatches } from '@/lib/database';
 import PlayerAvatar from '@/components/PlayerAvatar';
+import MatchPredictorCard from '@/components/MatchPredictorCard';
+import MatchPredictorModal from '@/components/modals/MatchPredictorModal';
 import { toast } from 'sonner';
 
 interface MatchTabProps {
@@ -10,6 +12,7 @@ interface MatchTabProps {
 
 export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps) {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [isDouble, setIsDouble] = useState(false);
   const [player1, setPlayer1] = useState('');
   const [player2, setPlayer2] = useState('');
@@ -18,9 +21,10 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
   const [score1, setScore1] = useState('');
   const [score2, setScore2] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPredictorModal, setShowPredictorModal] = useState(false);
 
   useEffect(() => {
-    loadPlayers();
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -32,6 +36,12 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
       setPlayer4(prefillTeams.team2[1] || '');
     }
   }, [prefillTeams]);
+
+  async function loadData() {
+    const [playersData, matchesData] = await Promise.all([getPlayers(), getMatches()]);
+    setPlayers(playersData);
+    setMatches(matchesData);
+  }
 
   async function loadPlayers() {
     const data = await getPlayers();
@@ -115,6 +125,11 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
       : ![player1, player2, player3, player4].includes(p.name)
   );
 
+  // Get player objects for prediction (only for singles matches)
+  const selectedPlayer1 = !isDouble && player1 ? players.find(p => p.name === player1) : null;
+  const selectedPlayer2 = !isDouble && player2 ? players.find(p => p.name === player2) : null;
+  const showPredictor = selectedPlayer1 && selectedPlayer2 && !isDouble;
+
   return (
     <div className="max-w-2xl mx-auto">
       <h2 className="text-2xl font-semibold mb-6">Nuova Partita</h2>
@@ -141,6 +156,16 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
           Doppio
         </button>
       </div>
+
+      {/* Match Predictor Card - Shows when both players selected in singles */}
+      {showPredictor && (
+        <MatchPredictorCard
+          player1={selectedPlayer1}
+          player2={selectedPlayer2}
+          matches={matches}
+          onClick={() => setShowPredictorModal(true)}
+        />
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -176,9 +201,9 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
                     .filter(p => ![player1, player3, player4].includes(p.name))
                     .map(p => (
                       <option key={p.id} value={p.name}>
-                      {p.name}
-                    </option>
-                  ))}
+                        {p.name}
+                      </option>
+                    ))}
                 </select>
               )}
 
@@ -261,6 +286,16 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
           {loading ? 'Salvataggio...' : 'Salva Risultato'}
         </button>
       </form>
+
+      {/* Match Predictor Modal */}
+      {showPredictorModal && selectedPlayer1 && selectedPlayer2 && (
+        <MatchPredictorModal
+          player1={selectedPlayer1}
+          player2={selectedPlayer2}
+          matches={matches}
+          onClose={() => setShowPredictorModal(false)}
+        />
+      )}
     </div>
   );
 }
