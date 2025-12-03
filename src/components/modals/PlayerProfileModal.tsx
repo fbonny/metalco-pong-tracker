@@ -3,7 +3,7 @@ import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
 import { X, Edit2, Save, Upload, Trash2, Plus } from 'lucide-react';
 import { useState } from 'react';
-import { uploadImage } from '@/lib/imageUtils';
+import { compressImage, compressFamePhoto } from '@/lib/imageUtils';
 import { toast } from '@/hooks/use-toast';
 
 interface PlayerProfileModalProps {
@@ -29,7 +29,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
     if (!file) return;
     
     try {
-      const imageUrl = await uploadImage(file);
+      const imageUrl = await compressImage(file);
       setAvatar(imageUrl);
     } catch (error) {
       toast({
@@ -45,12 +45,12 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
     if (!file) return;
     
     try {
-      const imageUrl = await uploadImage(file);
+      const imageUrl = await compressFamePhoto(file);
       setFameEntries([...fameEntries, { photo: imageUrl, date: new Date().toISOString().split('T')[0], caption: '' }]);
     } catch (error) {
       toast({
         title: 'Errore',
-        description: 'Impossibile caricare l\'immagine',
+        description: error instanceof Error ? error.message : 'Impossibile caricare l\'immagine',
         variant: 'destructive',
       });
     }
