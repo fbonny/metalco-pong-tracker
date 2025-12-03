@@ -19,6 +19,8 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   // Form state
   const [avatar, setAvatar] = useState(player.avatar || '');
   const [description, setDescription] = useState(player.description || '');
+  const [hand, setHand] = useState(player.hand || 'Destra');
+  const [shot, setShot] = useState(player.shot || 'Dritto');
   const [fameEntries, setFameEntries] = useState<FameEntry[]>(player.fame_entries || []);
   
   const matchesPlayed = player.wins + player.losses;
@@ -62,6 +64,8 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
       await updatePlayer(player.id, {
         avatar,
         description,
+        hand,
+        shot,
         fame_entries: fameEntries,
         updated_at: new Date().toISOString(),
       });
@@ -162,6 +166,44 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                 {description || 'Nessuna descrizione'}
               </p>
             )}
+          </div>
+
+          {/* Preferenze */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold mb-2">✋ Mano</label>
+              {isEditing ? (
+                <select
+                  value={hand}
+                  onChange={(e) => setHand(e.target.value)}
+                  className="w-full p-3 border-2 border-foreground bg-background"
+                >
+                  <option value="Destra">Destrorso</option>
+                  <option value="Sinistra">Mancino</option>
+                </select>
+              ) : (
+                <p className="p-3 border-2 border-muted font-medium">
+                  {hand === 'Destra' ? '🤚 Destrorso' : '🤚 Mancino'}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">🏓 Colpo Preferito</label>
+              {isEditing ? (
+                <select
+                  value={shot}
+                  onChange={(e) => setShot(e.target.value)}
+                  className="w-full p-3 border-2 border-foreground bg-background"
+                >
+                  <option value="Dritto">Dritto</option>
+                  <option value="Rovescio">Rovescio</option>
+                </select>
+              ) : (
+                <p className="p-3 border-2 border-muted font-medium">
+                  {shot}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Statistiche */}
@@ -270,6 +312,8 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                   setIsEditing(false);
                   setAvatar(player.avatar || '');
                   setDescription(player.description || '');
+                  setHand(player.hand || 'Destra');
+                  setShot(player.shot || 'Dritto');
                   setFameEntries(player.fame_entries || []);
                 }}
                 className="flex-1 px-4 py-3 border-2 border-foreground hover:bg-muted transition-colors"
