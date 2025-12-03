@@ -82,39 +82,51 @@ export default function Home() {
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       {selectedPlayer && (
-        <PlayerProfileModal
-          player={selectedPlayer}
-          onClose={() => setSelectedPlayer(null)}
-          onUpdate={() => {
-            setSelectedPlayer(null);
-            handleRefresh();
-          }}
-        />
+        <>
+          {console.log('🔵 RENDERING PlayerProfileModal for:', selectedPlayer.name)}
+          <PlayerProfileModal
+            player={selectedPlayer}
+            onClose={() => setSelectedPlayer(null)}
+            onUpdate={() => {
+              setSelectedPlayer(null);
+              handleRefresh();
+            }}
+          />
+        </>
       )}
 
       {selectedPlayerStats && (
-        <PlayerStatsModal
-          player={selectedPlayerStats}
-          onClose={() => setSelectedPlayerStats(null)}
-        />
+        <>
+          {console.log('🟢 RENDERING PlayerStatsModal for:', selectedPlayerStats.name)}
+          <PlayerStatsModal
+            player={selectedPlayerStats}
+            onClose={() => setSelectedPlayerStats(null)}
+          />
+        </>
       )}
 
       {editingMatch && (
-        <EditMatchModal
-          match={editingMatch}
-          onClose={() => setEditingMatch(null)}
-          onUpdate={() => {
-            setEditingMatch(null);
-            handleRefresh();
-          }}
-        />
+        <>
+          {console.log('🟡 RENDERING EditMatchModal for:', editingMatch.id)}
+          <EditMatchModal
+            match={editingMatch}
+            onClose={() => setEditingMatch(null)}
+            onUpdate={() => {
+              setEditingMatch(null);
+              handleRefresh();
+            }}
+          />
+        </>
       )}
 
       {statsType && (
-        <StatsModal
-          type={statsType}
-          onClose={() => setStatsType(null)}
-        />
+        <>
+          {console.log('🟠 RENDERING StatsModal for:', statsType)}
+          <StatsModal
+            type={statsType}
+            onClose={() => setStatsType(null)}
+          />
+        </>
       )}
     </div>
   );

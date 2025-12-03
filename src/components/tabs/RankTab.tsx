@@ -81,7 +81,10 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
               </div>
 
               <button
-                onClick={() => onPlayerClick(player)}
+                onClick={() => {
+                  console.log('🔵 INFO BUTTON - Opening Profile Modal');
+                  onPlayerClick(player);
+                }}
                 className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors flex-shrink-0"
                 title="Profilo"
               >
@@ -89,7 +92,10 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
               </button>
 
               <button
-                onClick={() => onStatsClick(player)}
+                onClick={() => {
+                  console.log('🟢 STATS BUTTON - Opening Stats Modal');
+                  onStatsClick(player);
+                }}
                 className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors flex-shrink-0"
                 title="Statistiche"
               >
