@@ -23,7 +23,7 @@ export default function PlayerProfileModal({ player, onClose }: PlayerProfileMod
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 border-b-2 border-foreground">
-          <h2 className="text-2xl font-semibold">Profilo Giocatore</h2>
+          <h2 className="text-2xl font-semibold">👤 Profilo Giocatore</h2>
           <button onClick={onClose} className="p-2 hover:bg-muted transition-colors">
             <X className="w-5 h-5" />
           </button>

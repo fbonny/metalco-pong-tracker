@@ -37,7 +37,7 @@ export default function PlayerStatsModal({ player, onClose }: PlayerStatsModalPr
           <div className="flex items-center gap-3">
             <PlayerAvatar name={player.name} avatar={player.avatar} size="md" />
             <div>
-              <h2 className="text-2xl font-semibold">{player.name}</h2>
+              <h2 className="text-2xl font-semibold">📊 Statistiche {player.name}</h2>
               <div className="text-sm text-muted-foreground">Rank #{currentRank} • {formatPoints(player.points)} pts</div>
             </div>
           </div>
