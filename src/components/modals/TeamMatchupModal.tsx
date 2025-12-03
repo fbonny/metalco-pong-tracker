@@ -1,28 +1,44 @@
-import { Player } from '@/lib/database';
+import { Player, Match } from '@/lib/database';
 import PlayerAvatar from '@/components/PlayerAvatar';
+import WinProbabilityGauge from '@/components/WinProbabilityGauge';
+import { calculateDoubleProbability } from '@/lib/statsUtils';
 import { X, RefreshCw } from 'lucide-react';
 
 interface TeamMatchupModalProps {
-  teamBlu: { name: string; avatar?: string }[];
-  teamRosso: { name: string; avatar?: string }[];
+  teamBluPlayers: Player[];
+  teamRossoPlayers: Player[];
+  matches: Match[];
   onClose: () => void;
   onUseForMatch: () => void;
   onGenerateAgain: () => void;
 }
 
 export default function TeamMatchupModal({
-  teamBlu,
-  teamRosso,
+  teamBluPlayers,
+  teamRossoPlayers,
+  matches,
   onClose,
   onUseForMatch,
   onGenerateAgain,
 }: TeamMatchupModalProps) {
+  // Calculate win probability
+  const prediction = teamBluPlayers.length === 2 && teamRossoPlayers.length === 2
+    ? calculateDoubleProbability(
+        teamBluPlayers[0].name,
+        teamBluPlayers[1].name,
+        teamRossoPlayers[0].name,
+        teamRossoPlayers[1].name,
+        [...teamBluPlayers, ...teamRossoPlayers],
+        matches
+      )
+    : null;
+
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
       onClick={onClose}
     >
-      <div 
+      <div
         className="bg-background border-2 border-foreground max-w-4xl w-full p-8 relative animate-zoom-in"
         onClick={(e) => e.stopPropagation()}
       >
@@ -41,7 +57,7 @@ export default function TeamMatchupModal({
             <div className="relative">
               {/* Player boxes */}
               <div className="flex flex-col gap-3">
-                {teamRosso.map((player, index) => (
+                {teamRossoPlayers.map((player, index) => (
                   <div
                     key={index}
                     className={`w-32 h-32 sm:w-40 sm:h-40 border-4 border-team-rosso bg-team-rosso/10 flex items-center justify-center animate-slide-in-left opacity-0 ${
@@ -50,14 +66,14 @@ export default function TeamMatchupModal({
                     style={{ animationFillMode: 'forwards' }}
                   >
                     {player.avatar ? (
-                      <img 
-                        src={player.avatar} 
+                      <img
+                        src={player.avatar}
                         alt={player.name}
                         className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="text-4xl font-bold" style={{ color: 'hsl(var(--team-rosso))' }}>
-                        {player.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                        {player.name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2)}
                       </div>
                     )}
                   </div>
@@ -76,7 +92,7 @@ export default function TeamMatchupModal({
             <div className="relative">
               {/* Player boxes */}
               <div className="flex flex-col gap-3">
-                {teamBlu.map((player, index) => (
+                {teamBluPlayers.map((player, index) => (
                   <div
                     key={index}
                     className={`w-32 h-32 sm:w-40 sm:h-40 border-4 border-team-blu bg-team-blu/10 flex items-center justify-center animate-slide-in-right opacity-0 ${
@@ -85,14 +101,14 @@ export default function TeamMatchupModal({
                     style={{ animationFillMode: 'forwards' }}
                   >
                     {player.avatar ? (
-                      <img 
-                        src={player.avatar} 
+                      <img
+                        src={player.avatar}
                         alt={player.name}
                         className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="text-4xl font-bold" style={{ color: 'hsl(var(--team-blu))' }}>
-                        {player.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                        {player.name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2)}
                       </div>
                     )}
                   </div>
@@ -102,20 +118,32 @@ export default function TeamMatchupModal({
           </div>
         </div>
 
+        {/* Win Probability Gauge - ADDED BELOW VS */}
+        {prediction && (
+          <div className="mb-8 animate-fade-in opacity-0 animate-delay-400" style={{ animationFillMode: 'forwards' }}>
+            <WinProbabilityGauge
+              team1Probability={prediction.team1WinProbability}
+              team2Probability={prediction.team2WinProbability}
+              team1Name={teamBluPlayers.map(p => p.name).join(' + ')}
+              team2Name={teamRossoPlayers.map(p => p.name).join(' + ')}
+            />
+          </div>
+        )}
+
         {/* Player Names */}
         <div className="flex items-start justify-center gap-8 mb-8">
           {/* Team Rosso Names */}
           <div className="flex-1 max-w-xs">
             <div className="space-y-2">
-              {teamRosso.map((player, index) => (
-                <div 
+              {teamRossoPlayers.map((player, index) => (
+                <div
                   key={index}
                   className={`text-2xl font-bold text-center animate-slide-in-left opacity-0 ${
                     index === 0 ? 'animate-delay-200' : 'animate-delay-300'
                   }`}
-                  style={{ 
+                  style={{
                     color: 'hsl(var(--team-rosso))',
-                    animationFillMode: 'forwards'
+                    animationFillMode: 'forwards',
                   }}
                 >
                   {player.name}
@@ -130,15 +158,15 @@ export default function TeamMatchupModal({
           {/* Team Blu Names */}
           <div className="flex-1 max-w-xs">
             <div className="space-y-2">
-              {teamBlu.map((player, index) => (
-                <div 
+              {teamBluPlayers.map((player, index) => (
+                <div
                   key={index}
                   className={`text-2xl font-bold text-center animate-slide-in-right opacity-0 ${
                     index === 0 ? 'animate-delay-200' : 'animate-delay-300'
                   }`}
-                  style={{ 
+                  style={{
                     color: 'hsl(var(--team-blu))',
-                    animationFillMode: 'forwards'
+                    animationFillMode: 'forwards',
                   }}
                 >
                   {player.name}

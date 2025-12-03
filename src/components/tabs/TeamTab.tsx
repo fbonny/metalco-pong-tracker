@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Player, getPlayers } from '@/lib/database';
+import { Player, getPlayers, Match, getMatches } from '@/lib/database';
 import PlayerAvatar from '@/components/PlayerAvatar';
 import TeamMatchupModal from '@/components/modals/TeamMatchupModal';
 import { toast } from 'sonner';
@@ -10,17 +10,19 @@ interface TeamTabProps {
 
 export default function TeamTab({ onUseForMatch }: TeamTabProps) {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [generatedTeams, setGeneratedTeams] = useState<{ teamBlu: string[]; teamRosso: string[] } | null>(null);
   const [showMatchupModal, setShowMatchupModal] = useState(false);
 
   useEffect(() => {
-    loadPlayers();
+    loadData();
   }, []);
 
-  async function loadPlayers() {
-    const data = await getPlayers();
-    setPlayers(data);
+  async function loadData() {
+    const [playersData, matchesData] = await Promise.all([getPlayers(), getMatches()]);
+    setPlayers(playersData);
+    setMatches(matchesData);
   }
 
   function togglePlayer(name: string) {
@@ -142,14 +144,9 @@ export default function TeamTab({ onUseForMatch }: TeamTabProps) {
       {/* Team Matchup Modal */}
       {showMatchupModal && generatedTeams && (
         <TeamMatchupModal
-          teamBlu={generatedTeams.teamBlu.map(name => {
-            const player = players.find(p => p.name === name);
-            return { name, avatar: player?.avatar };
-          })}
-          teamRosso={generatedTeams.teamRosso.map(name => {
-            const player = players.find(p => p.name === name);
-            return { name, avatar: player?.avatar };
-          })}
+          teamBluPlayers={generatedTeams.teamBlu.map(name => players.find(p => p.name === name)!).filter(Boolean)}
+          teamRossoPlayers={generatedTeams.teamRosso.map(name => players.find(p => p.name === name)!).filter(Boolean)}
+          matches={matches}
           onClose={handleCloseModal}
           onUseForMatch={handleUseForMatch}
           onGenerateAgain={handleGenerateAgain}
