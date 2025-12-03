@@ -1,7 +1,6 @@
 import { Player, Match } from '@/lib/database';
 import { calculateWinProbability, calculateDoubleProbability } from '@/lib/statsUtils';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import WinProbabilityGauge from './WinProbabilityGauge';
 
 interface MatchPredictorCardProps {
   // For singles
@@ -42,14 +41,33 @@ export default function MatchPredictorCard({
           <span className="text-xs text-muted-foreground">Click per dettagli</span>
         </div>
 
-        {/* Win Probability Gauge */}
-        <div className="mb-4 py-2">
-          <WinProbabilityGauge
-            team1Probability={prediction.player1WinProbability}
-            team2Probability={prediction.player2WinProbability}
-            team1Name={player1.name}
-            team2Name={player2.name}
-          />
+        {/* Win Probability Bars */}
+        <div className="space-y-2 mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold w-32 truncate">{player1.name}</span>
+            <div className="flex-1 h-6 border-2 border-foreground relative overflow-hidden">
+              <div 
+                className="h-full bg-foreground transition-all"
+                style={{ width: `${prediction.player1WinProbability}%` }}
+              />
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold mix-blend-difference text-background">
+                {prediction.player1WinProbability.toFixed(0)}%
+              </span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold w-32 truncate">{player2.name}</span>
+            <div className="flex-1 h-6 border-2 border-foreground relative overflow-hidden">
+              <div 
+                className="h-full bg-foreground transition-all"
+                style={{ width: `${prediction.player2WinProbability}%` }}
+              />
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold mix-blend-difference text-background">
+                {prediction.player2WinProbability.toFixed(0)}%
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Head to Head */}
@@ -95,14 +113,37 @@ export default function MatchPredictorCard({
           <span className="text-xs text-muted-foreground">Click per dettagli</span>
         </div>
 
-        {/* Win Probability Gauge */}
-        <div className="mb-4 py-2">
-          <WinProbabilityGauge
-            team1Probability={prediction.team1WinProbability}
-            team2Probability={prediction.team2WinProbability}
-            team1Name={`${team1Player1.name} + ${team1Player2.name}`}
-            team2Name={`${team2Player1.name} + ${team2Player2.name}`}
-          />
+        {/* Win Probability Bars */}
+        <div className="space-y-2 mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold w-40 truncate">
+              {team1Player1.name} + {team1Player2.name}
+            </span>
+            <div className="flex-1 h-6 border-2 border-foreground relative overflow-hidden">
+              <div 
+                className="h-full bg-foreground transition-all"
+                style={{ width: `${prediction.team1WinProbability}%` }}
+              />
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold mix-blend-difference text-background">
+                {prediction.team1WinProbability.toFixed(0)}%
+              </span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold w-40 truncate">
+              {team2Player1.name} + {team2Player2.name}
+            </span>
+            <div className="flex-1 h-6 border-2 border-foreground relative overflow-hidden">
+              <div 
+                className="h-full bg-foreground transition-all"
+                style={{ width: `${prediction.team2WinProbability}%` }}
+              />
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-bold mix-blend-difference text-background">
+                {prediction.team2WinProbability.toFixed(0)}%
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Pair Stats */}
