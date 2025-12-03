@@ -16,7 +16,7 @@ export default function WinProbabilityGauge({
   const needleAngle = (team1Probability - 50) * 1.8; // Scale 0-100 to -90 to +90
 
   return (
-    <div className="relative w-full max-w-md mx-auto">
+    <div className="relative w-full max-w-xs mx-auto">
       {/* Gauge Container */}
       <div className="relative aspect-[2/1] w-full">
         {/* Background semicircle */}
@@ -132,35 +132,35 @@ export default function WinProbabilityGauge({
         </svg>
 
         {/* VS Text */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl font-bold opacity-20 select-none" style={{ transform: 'translate(-50%, -70%)' }}>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold opacity-20 select-none" style={{ transform: 'translate(-50%, -70%)' }}>
           VS
         </div>
       </div>
 
       {/* Percentages */}
-      <div className="flex justify-between items-center mt-2 px-4">
+      <div className="flex justify-between items-center mt-1 px-2">
         <div className="text-center flex-1">
-          <div className={`text-3xl font-bold ${team2Probability > 50 ? 'text-red-500' : 'text-muted-foreground'}`}>
+          <div className={`text-xl font-bold ${team2Probability > 50 ? 'text-red-500' : 'text-muted-foreground'}`}>
             {team2Probability.toFixed(0)}%
           </div>
-          <div className="text-xs font-semibold text-muted-foreground mt-1 truncate">
+          <div className="text-[10px] font-semibold text-muted-foreground mt-1 truncate">
             {team2Name}
           </div>
         </div>
         
         <div className="text-center flex-1">
-          <div className={`text-3xl font-bold ${team1Probability > 50 ? 'text-green-500' : 'text-muted-foreground'}`}>
+          <div className={`text-xl font-bold ${team1Probability > 50 ? 'text-green-500' : 'text-muted-foreground'}`}>
             {team1Probability.toFixed(0)}%
           </div>
-          <div className="text-xs font-semibold text-muted-foreground mt-1 truncate">
+          <div className="text-[10px] font-semibold text-muted-foreground mt-1 truncate">
             {team1Name}
           </div>
         </div>
       </div>
 
       {/* Probability label */}
-      <div className="text-center mt-2">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+      <div className="text-center mt-1">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
           Probabilità di Vittoria
         </p>
       </div>
