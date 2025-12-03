@@ -28,7 +28,7 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Classifica 🏓 v2</h2>
+      <h2 className="text-2xl font-semibold mb-6">🏓 CLASSIFICA - VERSIONE AGGIORNATA 🏓</h2>
       
       <div className="space-y-2">
         {players.map((player, index) => {
