@@ -2,4 +2,4 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules
 
-Start by editing src/pages/index.tsx
+Start by editing src/pages/index.tsx# Force deploy Wed Dec  3 14:03:09 UTC 2025
