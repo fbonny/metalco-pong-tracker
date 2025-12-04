@@ -1,7 +1,7 @@
-import { Player, updatePlayer, FameEntry, getPlayers } from '@/lib/database';
+import { Player, updatePlayer, FameEntry, getPlayers, deletePlayer } from '@/lib/database';
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
-import { X, Edit2, Save, Upload, Trash2, Plus, Crown, TrendingUp } from 'lucide-react';
+import { X, Edit2, Save, Upload, Trash2, Plus, Crown, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { compressImage, compressFamePhoto } from '@/lib/imageUtils';
 import { toast } from '@/hooks/use-toast';
@@ -15,10 +15,12 @@ interface PlayerProfileModalProps {
 export default function PlayerProfileModal({ player, onClose, onUpdate }: PlayerProfileModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [currentRank, setCurrentRank] = useState(0);
   const [bestRank, setBestRank] = useState<number | undefined>(player.best_rank);
 
   // Form state
+  const [name, setName] = useState(player.name);
   const [avatar, setAvatar] = useState(player.avatar || '');
   const [description, setDescription] = useState(player.description || '');
   const [skill, setSkill] = useState(player.skill || '');
@@ -81,9 +83,19 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   };
 
   const handleSave = async () => {
+    if (!name.trim()) {
+      toast({
+        title: 'Errore',
+        description: 'Il nome del giocatore non può essere vuoto',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
       await updatePlayer(player.id, {
+        name: name.trim(),
         avatar,
         description,
         skill,
@@ -122,6 +134,24 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
     setFameEntries(updated);
   };
 
+  const handleDelete = async () => {
+    try {
+      await deletePlayer(player.id);
+      toast({
+        title: 'Giocatore eliminato',
+        description: `${player.name} è stato rimosso dal database`,
+      });
+      onUpdate();
+      onClose();
+    } catch (error) {
+      toast({
+        title: 'Errore',
+        description: 'Impossibile eliminare il giocatore',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto"
@@ -153,7 +183,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
           {/* Avatar e Nome */}
           <div className="flex items-start gap-4">
             <div className="relative">
-              <PlayerAvatar name={player.name} avatar={avatar} size="lg" />
+              <PlayerAvatar name={name} avatar={avatar} size="lg" />
               {isEditing && (
                 <label className="absolute -bottom-2 -right-2 bg-foreground text-background p-2 cursor-pointer hover:bg-foreground/80 transition-colors">
                   <Upload className="w-4 h-4" />
@@ -167,7 +197,18 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
               )}
             </div>
             <div className="flex-1">
-              <h3 className="text-2xl font-bold">{player.name}</h3>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="text-2xl font-bold w-full p-2 border-2 border-foreground bg-background"
+                  placeholder="Nome giocatore"
+                  maxLength={50}
+                />
+              ) : (
+                <h3 className="text-2xl font-bold">{name}</h3>
+              )}
               <div className="text-lg text-muted-foreground">
                 {formatPoints(player.points)} punti
               </div>
@@ -402,24 +443,16 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
             )}
           </div>
 
-          {/* Pulsante Salva */}
+          {/* Pulsanti Azioni */}
           {isEditing && (
             <div className="flex gap-3 pt-4 border-t-2 border-foreground">
               <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setAvatar(player.avatar || '');
-                  setDescription(player.description || '');
-                  setSkill(player.skill || '');
-                  setLack(player.lack || '');
-                  setHand(player.hand || 'Destra');
-                  setShot(player.shot || 'Dritto');
-                  setFameEntries(player.fame_entries || []);
-                }}
-                className="flex-1 px-4 py-3 border-2 border-foreground hover:bg-muted transition-colors"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex-1 px-4 py-3 border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors flex items-center justify-center gap-2"
                 disabled={isSaving}
               >
-                Annulla
+                <Trash2 className="w-4 h-4" />
+                Elimina Giocatore
               </button>
               <button
                 onClick={handleSave}
@@ -433,6 +466,50 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
           )}
         </div>
       </div>
+
+      {/* Modale Conferma Eliminazione */}
+      {showDeleteConfirm && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <div 
+            className="bg-background border-2 border-destructive max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-destructive/10 border-2 border-destructive">
+                <AlertTriangle className="w-6 h-6 text-destructive" />
+              </div>
+              <h3 className="text-xl font-bold">Conferma Eliminazione</h3>
+            </div>
+            
+            <p className="mb-6 text-muted-foreground">
+              Sei sicuro di voler eliminare <span className="font-bold text-foreground">{player.name}</span>?
+              <br /><br />
+              <span className="text-destructive font-semibold">Questa azione è irreversibile!</span>
+              <br />
+              Verranno eliminate tutte le partite associate a questo giocatore.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-3 border-2 border-foreground hover:bg-muted transition-colors"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 px-4 py-3 bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-colors flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Elimina Definitivamente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
