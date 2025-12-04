@@ -13,6 +13,7 @@ interface PlayerStatsModalProps {
 export default function PlayerStatsModal({ player, onClose }: PlayerStatsModalProps) {
   const [advancedStats, setAdvancedStats] = useState<ReturnType<typeof calculateAdvancedStats> | null>(null);
   const [currentRank, setCurrentRank] = useState(0);
+  const [bestRank, setBestRank] = useState<number | undefined>(player.best_rank);
   const matchesPlayed = player.wins + player.losses;
   const winRate = matchesPlayed > 0 ? (player.wins / matchesPlayed) * 100 : 0;
 
@@ -25,6 +26,13 @@ export default function PlayerStatsModal({ player, onClose }: PlayerStatsModalPr
         return pointsB - pointsA || b.wins - a.wins;
       });
       setCurrentRank(sorted.findIndex(p => p.id === player.id) + 1);
+      
+      // Update best rank from player data
+      const currentPlayer = playersData.find(p => p.id === player.id);
+      if (currentPlayer?.best_rank) {
+        setBestRank(currentPlayer.best_rank);
+      }
+      
       setAdvancedStats(calculateAdvancedStats(player, matchesData, playersData));
     }
     loadAdvancedData();
@@ -139,6 +147,39 @@ export default function PlayerStatsModal({ player, onClose }: PlayerStatsModalPr
                   <div className="text-2xl font-bold">
                     {advancedStats.bestStreak.count}
                     <span className="text-sm ml-1 text-green-600">W</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-4 border-2 border-amber-600 bg-amber-600/5 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Crown className="w-4 h-4 text-amber-600" />
+                    <span className="text-xs font-semibold text-amber-600">BEST RANKING</span>
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {bestRank ? `#${bestRank}` : 'N/A'}
+                  </div>
+                  {bestRank && bestRank < currentRank && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {currentRank - bestRank} posizioni dal best
+                    </div>
+                  )}
+                  {bestRank && bestRank === currentRank && (
+                    <div className="text-xs text-amber-600 font-semibold mt-1">
+                      🔥 MIGLIOR POSIZIONE!
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-4 border-2 border-foreground text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <TrendingUp className="w-4 h-4" />
+                    <span className="text-xs font-semibold">RANK ATTUALE</span>
+                  </div>
+                  <div className="text-2xl font-bold">#{currentRank}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {formatPoints(player.points)} pts
                   </div>
                 </div>
               </div>
