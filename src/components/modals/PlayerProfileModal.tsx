@@ -21,6 +21,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   // Form state
   const [avatar, setAvatar] = useState(player.avatar || '');
   const [description, setDescription] = useState(player.description || '');
+  const [skill, setSkill] = useState(player.skill || '');
   const [hand, setHand] = useState(player.hand || 'Destra');
   const [shot, setShot] = useState(player.shot || 'Dritto');
   const [fameEntries, setFameEntries] = useState<FameEntry[]>(player.fame_entries || []);
@@ -84,6 +85,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
       await updatePlayer(player.id, {
         avatar,
         description,
+        skill,
         hand,
         shot,
         fame_entries: fameEntries,
@@ -184,6 +186,25 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
             ) : (
               <p className="text-muted-foreground italic p-3 border-2 border-muted">
                 {description || 'Nessuna descrizione'}
+              </p>
+            )}
+          </div>
+
+          {/* Skill */}
+          <div>
+            <label className="block text-sm font-semibold mb-2">⭐ Skill</label>
+            {isEditing ? (
+              <input
+                type="text"
+                value={skill}
+                onChange={(e) => setSkill(e.target.value)}
+                placeholder="Es: Maestro del top-spin, Re del servizio corto..."
+                className="w-full p-3 border-2 border-foreground bg-background"
+                maxLength={100}
+              />
+            ) : (
+              <p className="text-muted-foreground italic p-3 border-2 border-muted">
+                {skill || 'Nessuna skill specificata'}
               </p>
             )}
           </div>
@@ -368,6 +389,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                   setIsEditing(false);
                   setAvatar(player.avatar || '');
                   setDescription(player.description || '');
+                  setSkill(player.skill || '');
                   setHand(player.hand || 'Destra');
                   setShot(player.shot || 'Dritto');
                   setFameEntries(player.fame_entries || []);
