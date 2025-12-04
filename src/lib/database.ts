@@ -7,6 +7,7 @@ export interface Player {
   avatar?: string;
   description?: string;
   skill?: string;
+  lack?: string;
   fame_entries?: FameEntry[];
   hand: string;
   shot: string;
