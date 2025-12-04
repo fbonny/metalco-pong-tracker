@@ -1,8 +1,8 @@
-import { Player, updatePlayer, FameEntry } from '@/lib/database';
+import { Player, updatePlayer, FameEntry, getPlayers } from '@/lib/database';
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
-import { X, Edit2, Save, Upload, Trash2, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { X, Edit2, Save, Upload, Trash2, Plus, Crown, TrendingUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { compressImage, compressFamePhoto } from '@/lib/imageUtils';
 import { toast } from '@/hooks/use-toast';
 
@@ -15,21 +15,41 @@ interface PlayerProfileModalProps {
 export default function PlayerProfileModal({ player, onClose, onUpdate }: PlayerProfileModalProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+  const [currentRank, setCurrentRank] = useState(0);
+  const [bestRank, setBestRank] = useState<number | undefined>(player.best_rank);
+
   // Form state
   const [avatar, setAvatar] = useState(player.avatar || '');
   const [description, setDescription] = useState(player.description || '');
   const [hand, setHand] = useState(player.hand || 'Destra');
   const [shot, setShot] = useState(player.shot || 'Dritto');
   const [fameEntries, setFameEntries] = useState<FameEntry[]>(player.fame_entries || []);
-  
+
   const matchesPlayed = player.wins + player.losses;
   const winRate = matchesPlayed > 0 ? (player.wins / matchesPlayed) * 100 : 0;
+
+  useEffect(() => {
+    async function loadRankingData() {
+      const playersData = await getPlayers();
+      const sorted = [...playersData].sort((a, b) => {
+        const pointsA = typeof a.points === 'string' ? parseFloat(a.points) : a.points;
+        const pointsB = typeof b.points === 'string' ? parseFloat(b.points) : b.points;
+        return pointsB - pointsA || b.wins - a.wins;
+      });
+      setCurrentRank(sorted.findIndex(p => p.id === player.id) + 1);
+
+      const currentPlayer = playersData.find(p => p.id === player.id);
+      if (currentPlayer?.best_rank) {
+        setBestRank(currentPlayer.best_rank);
+      }
+    }
+    loadRankingData();
+  }, [player.id]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     try {
       const imageUrl = await compressImage(file);
       setAvatar(imageUrl);
@@ -45,7 +65,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   const handleFamePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     try {
       const imageUrl = await compressFamePhoto(file);
       setFameEntries([...fameEntries, { photo: imageUrl, date: new Date().toISOString().split('T')[0], caption: '' }]);
@@ -69,12 +89,12 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
         fame_entries: fameEntries,
         updated_at: new Date().toISOString(),
       });
-      
+
       toast({
         title: 'Profilo aggiornato',
         description: 'Le modifiche sono state salvate con successo',
       });
-      
+
       setIsEditing(false);
       onUpdate();
     } catch (error) {
@@ -99,11 +119,11 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
   };
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto" 
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto"
       onClick={onClose}
     >
-      <div 
+      <div
         className="bg-background border-2 border-foreground max-w-2xl w-full my-8"
         onClick={(e) => e.stopPropagation()}
       >
@@ -111,8 +131,8 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
           <h2 className="text-2xl font-semibold">👤 Profilo Giocatore</h2>
           <div className="flex gap-2">
             {!isEditing && (
-              <button 
-                onClick={() => setIsEditing(true)} 
+              <button
+                onClick={() => setIsEditing(true)}
                 className="p-2 hover:bg-muted transition-colors"
                 title="Modifica profilo"
               >
@@ -133,10 +153,10 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
               {isEditing && (
                 <label className="absolute -bottom-2 -right-2 bg-foreground text-background p-2 cursor-pointer hover:bg-foreground/80 transition-colors">
                   <Upload className="w-4 h-4" />
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
                     onChange={handleAvatarUpload}
                   />
                 </label>
@@ -225,10 +245,46 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
               <span className="text-sm font-semibold">{winRate.toFixed(1)}%</span>
             </div>
             <div className="w-full h-6 border-2 border-foreground">
-              <div 
-                className="h-full bg-foreground transition-all" 
-                style={{ width: `${winRate}%` }} 
+              <div
+                className="h-full bg-foreground transition-all"
+                style={{ width: `${winRate}%` }}
               />
+            </div>
+          </div>
+
+          {/* Rankings */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 border-2 border-amber-600 bg-amber-600/5 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Crown className="w-4 h-4 text-amber-600" />
+                <span className="text-xs font-semibold text-amber-600">BEST RANKING</span>
+              </div>
+              <div className="text-2xl font-bold">
+                {bestRank ? `#${bestRank}` : 'N/A'}
+              </div>
+              {bestRank && currentRank > 0 && bestRank < currentRank && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {currentRank - bestRank} posizioni dal best
+                </div>
+              )}
+              {bestRank && currentRank > 0 && bestRank === currentRank && (
+                <div className="text-xs text-amber-600 font-semibold mt-1">
+                  🔥 MIGLIOR POSIZIONE!
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-2 border-foreground text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4" />
+                <span className="text-xs font-semibold">RANK ATTUALE</span>
+              </div>
+              <div className="text-2xl font-bold">
+                {currentRank > 0 ? `#${currentRank}` : 'N/A'}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {formatPoints(player.points)} pts
+              </div>
             </div>
           </div>
 
@@ -240,16 +296,16 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                 <label className="flex items-center gap-2 px-3 py-1.5 bg-foreground text-background cursor-pointer hover:bg-foreground/80 transition-colors text-sm">
                   <Plus className="w-4 h-4" />
                   Aggiungi Foto
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
                     onChange={handleFamePhotoUpload}
                   />
                 </label>
               )}
             </div>
-            
+
             {fameEntries.length === 0 ? (
               <p className="text-muted-foreground italic text-center p-4 border-2 border-muted">
                 Nessuna foto nella Wall of Fame
@@ -259,9 +315,9 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
                 {fameEntries.map((entry, index) => (
                   <div key={index} className="border-2 border-foreground p-3 space-y-2">
                     <div className="flex gap-3">
-                      <img 
-                        src={entry.photo} 
-                        alt={`Fame ${index + 1}`} 
+                      <img
+                        src={entry.photo}
+                        alt={`Fame ${index + 1}`}
                         className="w-24 h-24 object-cover border-2 border-foreground"
                       />
                       <div className="flex-1 space-y-2">
