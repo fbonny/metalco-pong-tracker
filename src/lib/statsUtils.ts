@@ -22,6 +22,13 @@ export interface PlayerMatchup {
   totalMatches: number;
 }
 
+export interface TeammateStats {
+  teammateName: string;
+  matchesPlayed: number;
+  wins: number;
+  winRate: number;
+}
+
 export interface FormPeriod {
   period: string;
   wins: number;
@@ -32,6 +39,7 @@ export interface FormPeriod {
 export interface PlayerAdvancedStats {
   nemesis: PlayerMatchup | null;
   victim: PlayerMatchup | null;
+  favoriteTeammates: TeammateStats[];
   recentForm: FormPeriod[];
   bestStreak: { type: 'W' | 'L'; count: number };
   currentStreak: { type: 'W' | 'L'; count: number };
@@ -245,6 +253,60 @@ export function calculateWinProbability(
 }
 
 /**
+ * Calculate teammate statistics (how often a player played with each teammate)
+ */
+function getTeammateStats(playerName: string, matches: Match[], allPlayerNames: string[]): TeammateStats[] {
+  const teammateMap: Record<string, { matches: number; wins: number }> = {};
+
+  // Filter only doubles matches where the player participated
+  const doublesMatches = matches.filter(match => {
+    if (!match.is_double) return false;
+    return match.team1.includes(playerName) || match.team2.includes(playerName);
+  });
+
+  doublesMatches.forEach(match => {
+    // Find which team the player is on
+    const playerTeam = match.team1.includes(playerName) ? match.team1 : match.team2;
+    
+    // Find teammates (other players on the same team)
+    const teammates = playerTeam.filter(name => name !== playerName);
+    
+    // Determine if this team won
+    const isTeam1 = match.team1.includes(playerName);
+    const didWin = isTeam1 ? match.score1 > match.score2 : match.score2 > match.score1;
+
+    // Update stats for each teammate
+    teammates.forEach(teammate => {
+      if (!teammateMap[teammate]) {
+        teammateMap[teammate] = { matches: 0, wins: 0 };
+      }
+      teammateMap[teammate].matches++;
+      if (didWin) {
+        teammateMap[teammate].wins++;
+      }
+    });
+  });
+
+  // Convert to array and calculate win rates
+  const teammateStats: TeammateStats[] = Object.entries(teammateMap).map(([name, stats]) => ({
+    teammateName: name,
+    matchesPlayed: stats.matches,
+    wins: stats.wins,
+    winRate: stats.matches > 0 ? (stats.wins / stats.matches) * 100 : 0,
+  }));
+
+  // Sort by matches played (descending), then by win rate
+  teammateStats.sort((a, b) => {
+    if (b.matchesPlayed !== a.matchesPlayed) {
+      return b.matchesPlayed - a.matchesPlayed;
+    }
+    return b.winRate - a.winRate;
+  });
+
+  return teammateStats;
+}
+
+/**
  * Calculate all matchups for a player
  */
 function getPlayerMatchups(playerName: string, matches: Match[], allPlayers: string[]): PlayerMatchup[] {
@@ -399,9 +461,17 @@ export function calculateAdvancedStats(
     .sort((a, b) => b.totalMatches - a.totalMatches)
     .slice(0, 3);
 
+  // Favorite teammates (most frequent doubles partners)
+  const allTeammateStats = getTeammateStats(playerName, matches, allPlayerNames);
+  
+  // Get teammates with max matches
+  const maxMatches = allTeammateStats.length > 0 ? allTeammateStats[0].matchesPlayed : 0;
+  const favoriteTeammates = allTeammateStats.filter(t => t.matchesPlayed === maxMatches && maxMatches > 0);
+
   return {
     nemesis,
     victim,
+    favoriteTeammates,
     recentForm,
     bestStreak,
     currentStreak,

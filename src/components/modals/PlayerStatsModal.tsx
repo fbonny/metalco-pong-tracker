@@ -3,7 +3,7 @@ import { Player, getPlayers, Match, getMatches } from '@/lib/database';
 import { formatPoints } from '@/lib/formatUtils';
 import { calculateAdvancedStats } from '@/lib/statsUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
-import { X, Crown, TrendingUp, Swords, Target, Flame } from 'lucide-react';
+import { X, Crown, TrendingUp, Swords, Target, Flame, Users } from 'lucide-react';
 
 interface PlayerStatsModalProps {
   player: Player;
@@ -102,6 +102,28 @@ export default function PlayerStatsModal({ player, onClose }: PlayerStatsModalPr
                   )}
                 </div>
               </div>
+
+              {/* Favorite Teammates */}
+              {advancedStats.favoriteTeammates.length > 0 && (
+                <div className="p-4 border-2 border-blue-600 bg-blue-600/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-semibold text-blue-600">
+                      {advancedStats.favoriteTeammates.length > 1 ? 'COMPAGNI PREFERITI' : 'COMPAGNO PREFERITO'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2">
+                    {advancedStats.favoriteTeammates.map((teammate, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-2 bg-muted/50 border border-foreground/20">
+                        <span className="font-semibold text-sm">{teammate.teammateName}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {teammate.matchesPlayed} {teammate.matchesPlayed === 1 ? 'match' : 'match'} • {teammate.winRate.toFixed(0)}% vittorie
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="p-4 border-2 border-foreground">
                 <div className="flex items-center gap-2 mb-3">
