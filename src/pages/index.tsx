@@ -12,7 +12,7 @@ import PlayerProfileModal from '@/components/modals/PlayerProfileModal';
 import PlayerStatsModal from '@/components/modals/PlayerStatsModal';
 import EditMatchModal from '@/components/modals/EditMatchModal';
 import StatsModal from '@/components/modals/StatsModal';
-import { Player, Match } from '@/lib/database';
+import { Player, Match, getPlayers } from '@/lib/database';
 import { checkAndIncrementLeaderDays } from '@/lib/leaderDaysTracker';
 import { useEffect } from 'react';
 
@@ -87,8 +87,13 @@ export default function Home() {
           <PlayerProfileModal
             player={selectedPlayer}
             onClose={() => setSelectedPlayer(null)}
-            onUpdate={() => {
-              setSelectedPlayer(null);
+            onUpdate={async () => {
+              // Ricarica i dati e aggiorna il player selezionato
+              const updatedPlayers = await getPlayers();
+              const updatedPlayer = updatedPlayers.find(p => p.id === selectedPlayer.id);
+              if (updatedPlayer) {
+                setSelectedPlayer(updatedPlayer);
+              }
               handleRefresh();
             }}
           />

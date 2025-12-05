@@ -112,6 +112,23 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
       });
 
       setIsEditing(false);
+      
+      // Ricarica i dati aggiornati dal database
+      const updatedPlayers = await getPlayers();
+      const updatedPlayer = updatedPlayers.find(p => p.id === player.id);
+      
+      if (updatedPlayer) {
+        // Aggiorna gli stati locali con i dati freschi dal database
+        setName(updatedPlayer.name);
+        setAvatar(updatedPlayer.avatar || '');
+        setDescription(updatedPlayer.description || '');
+        setSkill(updatedPlayer.skill || '');
+        setLack(updatedPlayer.lack || '');
+        setHand(updatedPlayer.hand || 'Destra');
+        setShot(updatedPlayer.shot || 'Dritto');
+        setFameEntries(updatedPlayer.fame_entries || []);
+      }
+      
       onUpdate();
     } catch (error) {
       toast({
