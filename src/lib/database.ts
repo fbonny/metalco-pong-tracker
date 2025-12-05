@@ -162,7 +162,9 @@ export function calculateMatchPoints(winnerScore: number, loserScore: number): {
   return { winner: 10 + bonus, loser: 0 };
 }
 
-// Recalculate all player stats from matches (only last 20 matches per player)
+// Recalculate all player stats from matches
+// POINTS: only last 20 matches per player (for ranking)
+// WINS/LOSSES: ALL matches (for total count and percentages)
 export async function recalculateAllStats(): Promise<void> {
   const [players, matches] = await Promise.all([getPlayers(), getMatches()]);
   
@@ -171,23 +173,40 @@ export async function recalculateAllStats(): Promise<void> {
     new Date(a.played_at).getTime() - new Date(b.played_at).getTime()
   );
   
-  // Calculate stats for each player based on their last 20 matches
+  // Calculate stats for each player
   const updatedPlayers = players.map(player => {
     // Find all matches where this player participated
     const playerMatches = sortedMatches.filter(match => 
       match.team1.includes(player.name) || match.team2.includes(player.name)
     );
     
-    // Take only the last 20 matches for this player
+    // Calculate TOTAL wins/losses from ALL matches
+    let totalWins = 0;
+    let totalLosses = 0;
+    const fullHistory: string[] = [];
+    
+    playerMatches.forEach(match => {
+      const isTeam1 = match.team1.includes(player.name);
+      const isTeam2 = match.team2.includes(player.name);
+      
+      if (!isTeam1 && !isTeam2) return;
+      
+      const winner = match.score1 > match.score2;
+      const playerWon = (isTeam1 && winner) || (isTeam2 && !winner);
+      
+      if (playerWon) {
+        totalWins++;
+        fullHistory.push('W');
+      } else {
+        totalLosses++;
+        fullHistory.push('L');
+      }
+    });
+    
+    // Calculate POINTS only from last 20 matches
     const last20Matches = playerMatches.slice(-20);
-    
-    // Initialize stats
-    let wins = 0;
-    let losses = 0;
     let points = 0;
-    const history: string[] = [];
     
-    // Calculate stats from the last 20 matches
     last20Matches.forEach(match => {
       const isTeam1 = match.team1.includes(player.name);
       const isTeam2 = match.team2.includes(player.name);
@@ -202,19 +221,20 @@ export async function recalculateAllStats(): Promise<void> {
       const pts = calculateMatchPoints(winnerScore, loserScore);
       
       if (playerWon) {
-        wins++;
         points += pts.winner;
-        history.push('W');
       } else {
-        losses++;
         points += pts.loser;
-        history.push('L');
       }
     });
     
     return {
       player,
-      stats: { wins, losses, points, history }
+      stats: { 
+        wins: totalWins,        // TOTAL from ALL matches
+        losses: totalLosses,    // TOTAL from ALL matches
+        points: points,         // Only from last 20 matches
+        history: fullHistory    // Full history for display
+      }
     };
   });
   
