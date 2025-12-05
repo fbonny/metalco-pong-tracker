@@ -110,11 +110,11 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
                     {last20Wins}V - {last20Losses}S
                   </div>
                   {last20History.length > 0 && (
-                    <div className="flex gap-1 mt-1 sm:mt-2 flex-wrap">
+                    <div className="flex gap-1 mt-1 sm:mt-2 overflow-x-auto">
                       {last20History.map((result, i) => (
                         <div
                           key={i}
-                          className={`w-2 h-2 rounded-full ${result === 'W' ? 'bg-green-500' : 'bg-red-500'}`}
+                          className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0 ${result === 'W' ? 'bg-green-500' : 'bg-red-500'}`}
                           title={result === 'W' ? 'Vittoria' : 'Sconfitta'}
                         />
                       ))}
