@@ -604,8 +604,8 @@ export function calculateDoubleProbability(
   let team1Score = 0;
   let team2Score = 0;
 
-  // 1. Pair synergy weight (40%)
-  const pairWeight = 0.4;
+  // 1. Pair synergy weight (25%) - Updated: performance individuale conta di più
+  const pairWeight = 0.25;
   team1Score += (team1PairStats.winRate / 100) * pairWeight;
   team2Score += (team2PairStats.winRate / 100) * pairWeight;
 
@@ -619,8 +619,8 @@ export function calculateDoubleProbability(
     team2Score += h2hWeight * 0.5;
   }
 
-  // 3. Individual win rates in doubles (30%)
-  const individualWeight = 0.3;
+  // 3. Individual win rates in doubles (45%) - Updated: fattore più importante
+  const individualWeight = 0.45;
   
   const getDoubleWinRate = (playerName: string): number => {
     const playerDoubles = matches.filter(m => {
