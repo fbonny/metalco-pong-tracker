@@ -188,6 +188,7 @@ export default function InfoTab({ onPlayerCreated }: InfoTabProps) {
           <div className="space-y-2 text-muted-foreground">
             <p><strong className="text-foreground">Punti Base:</strong> 10 punti</p>
             <p><strong className="text-foreground">Bonus:</strong> +0,5 punti per ogni punto di scarto oltre i 2</p>
+            <p><strong className="text-foreground">Massimo:</strong> 14 punti (scarto di 10 o più, es. 21-11 o meglio)</p>
             <p className="mt-4 text-sm">
               <strong className="text-foreground">Esempi:</strong>
             </p>
@@ -195,7 +196,8 @@ export default function InfoTab({ onPlayerCreated }: InfoTabProps) {
               <li>21-19: Il vincitore ottiene 10 punti (nessun bonus)</li>
               <li>21-18: Il vincitore ottiene 10,5 punti (1 punto di bonus)</li>
               <li>21-15: Il vincitore ottiene 12 punti (4 punti di bonus)</li>
-              <li>21-10: Il vincitore ottiene 14,5 punti (9 punti di bonus)</li>
+              <li>21-11: Il vincitore ottiene 14 punti (massimo raggiunto)</li>
+              <li>21-5 o 21-0: Il vincitore ottiene 14 punti (massimo)</li>
             </ul>
           </div>
         </div>

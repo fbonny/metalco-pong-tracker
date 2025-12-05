@@ -157,9 +157,12 @@ export function calculateMatchPoints(winnerScore: number, loserScore: number): {
   }
   
   // Standard win: 10 base + 0.5 per point diff beyond 2
+  // MAX 14 points (equivalent to 21-11 or better)
   const diff = winnerScore - loserScore;
   const bonus = Math.max(0, (diff - 2) * 0.5);
-  return { winner: 10 + bonus, loser: 0 };
+  const winnerPoints = Math.min(14, 10 + bonus); // Cap at 14 points
+  
+  return { winner: winnerPoints, loser: 0 };
 }
 
 // Recalculate all player stats from matches
