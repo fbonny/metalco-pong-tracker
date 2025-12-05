@@ -85,11 +85,16 @@ export async function createPlayer(player: Partial<Player>): Promise<Player> {
 }
 
 export async function updatePlayer(id: string, updates: Partial<Player>): Promise<Player> {
-  const [updated] = await fetchAPI(`players?id=eq.${id}`, {
+  const response = await fetchAPI(`players?id=eq.${id}`, {
     method: 'PATCH',
     body: JSON.stringify(updates),
   });
-  return updated;
+  
+  if (!response || response.length === 0) {
+    throw new Error('Nessun dato restituito dal database dopo l\'aggiornamento');
+  }
+  
+  return response[0];
 }
 
 export async function deletePlayer(id: string): Promise<void> {
