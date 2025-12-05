@@ -3,6 +3,7 @@ import { Player, getPlayers, createMatch, recalculateAllStats, Match, getMatches
 import PlayerAvatar from '@/components/PlayerAvatar';
 import MatchPredictorCard from '@/components/MatchPredictorCard';
 import MatchPredictorModal from '@/components/modals/MatchPredictorModal';
+import DoublesPredictorModal from '@/components/modals/DoublesPredictorModal';
 import { toast } from 'sonner';
 
 interface MatchTabProps {
@@ -161,7 +162,7 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
           team2Player1={isDouble ? selectedPlayer3! : undefined}
           team2Player2={isDouble ? selectedPlayer4! : undefined}
           matches={matches}
-          onClick={() => !isDouble && setShowPredictorModal(true)}
+          onClick={() => setShowPredictorModal(true)}
           isDouble={isDouble}
         />
       )}
@@ -200,9 +201,9 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
                     .filter(p => ![player1, player3, player4].includes(p.name))
                     .map(p => (
                       <option key={p.id} value={p.name}>
-                        {p.name}
-                      </option>
-                    ))}
+                      {p.name}
+                    </option>
+                  ))}
                 </select>
               )}
 
@@ -286,11 +287,22 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
         </button>
       </form>
 
-      {/* Match Predictor Modal */}
-      {showPredictorModal && selectedPlayer1 && selectedPlayer2 && (
+      {/* Match Predictor Modals */}
+      {showPredictorModal && !isDouble && selectedPlayer1 && selectedPlayer2 && (
         <MatchPredictorModal
           player1={selectedPlayer1}
           player2={selectedPlayer2}
+          matches={matches}
+          onClose={() => setShowPredictorModal(false)}
+        />
+      )}
+
+      {showPredictorModal && isDouble && selectedPlayer1 && selectedPlayer2 && selectedPlayer3 && selectedPlayer4 && (
+        <DoublesPredictorModal
+          team1Player1={selectedPlayer1}
+          team1Player2={selectedPlayer2}
+          team2Player1={selectedPlayer3}
+          team2Player2={selectedPlayer4}
           matches={matches}
           onClose={() => setShowPredictorModal(false)}
         />
