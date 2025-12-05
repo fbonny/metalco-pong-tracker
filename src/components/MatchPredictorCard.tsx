@@ -33,7 +33,6 @@ export default function MatchPredictorCard({
 
     return (
       <div 
-        onClick={onClick}
         className="border-2 border-foreground p-4 mb-6 cursor-pointer hover:bg-muted transition-colors animate-fade-in"
       >
         <div className="flex items-center justify-between mb-3">
@@ -105,12 +104,10 @@ export default function MatchPredictorCard({
 
     return (
       <div 
-        onClick={onClick}
-        className="border-2 border-foreground p-4 mb-6 cursor-pointer hover:bg-muted transition-colors animate-fade-in"
+        className="border-2 border-foreground p-4 mb-6 animate-fade-in"
       >
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-sm">📊 Previsione Doppio</h3>
-          <span className="text-xs text-muted-foreground">Click per dettagli</span>
         </div>
 
         {/* Win Probability Bars */}

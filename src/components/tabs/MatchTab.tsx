@@ -161,7 +161,7 @@ export default function MatchTab({ prefillTeams, onMatchCreated }: MatchTabProps
           team2Player1={isDouble ? selectedPlayer3! : undefined}
           team2Player2={isDouble ? selectedPlayer4! : undefined}
           matches={matches}
-          onClick={() => setShowPredictorModal(true)}
+          onClick={() => !isDouble && setShowPredictorModal(true)}
           isDouble={isDouble}
         />
       )}
