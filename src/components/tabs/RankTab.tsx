@@ -72,7 +72,6 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
           {players.map((player, index) => {
             const rank = index + 1;
             const isLeader = rank === 1;
-            const last10 = player.history.slice(-10);
             
             // Calculate wins/losses from last 20 matches for ranking display ONLY
             const last20History = player.history.slice(-20);
@@ -110,9 +109,9 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
                   <div className="text-xs sm:text-sm text-muted-foreground">
                     {last20Wins}V - {last20Losses}S
                   </div>
-                  {last10.length > 0 && (
-                    <div className="flex gap-1 mt-1 sm:mt-2">
-                      {last10.map((result, i) => (
+                  {last20History.length > 0 && (
+                    <div className="flex gap-1 mt-1 sm:mt-2 flex-wrap">
+                      {last20History.map((result, i) => (
                         <div
                           key={i}
                           className={`w-2 h-2 rounded-full ${result === 'W' ? 'bg-green-500' : 'bg-red-500'}`}
