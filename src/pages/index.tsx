@@ -88,6 +88,9 @@ export default function Home() {
             player={selectedPlayer}
             onClose={() => setSelectedPlayer(null)}
             onUpdate={async () => {
+              // Aspetta un momento per essere sicuri che il database abbia processato l'update
+              await new Promise(resolve => setTimeout(resolve, 150));
+              
               // Ricarica i dati e aggiorna il player selezionato
               const updatedPlayers = await getPlayers();
               const updatedPlayer = updatedPlayers.find(p => p.id === selectedPlayer.id);

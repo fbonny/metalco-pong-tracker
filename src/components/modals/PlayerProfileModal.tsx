@@ -94,7 +94,7 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
 
     setIsSaving(true);
     try {
-      await updatePlayer(player.id, {
+      const updated = await updatePlayer(player.id, {
         name: name.trim(),
         avatar,
         description,
@@ -113,24 +113,23 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
 
       setIsEditing(false);
       
-      // Ricarica i dati aggiornati dal database
-      const updatedPlayers = await getPlayers();
-      const updatedPlayer = updatedPlayers.find(p => p.id === player.id);
-      
-      if (updatedPlayer) {
-        // Aggiorna gli stati locali con i dati freschi dal database
-        setName(updatedPlayer.name);
-        setAvatar(updatedPlayer.avatar || '');
-        setDescription(updatedPlayer.description || '');
-        setSkill(updatedPlayer.skill || '');
-        setLack(updatedPlayer.lack || '');
-        setHand(updatedPlayer.hand || 'Destra');
-        setShot(updatedPlayer.shot || 'Dritto');
-        setFameEntries(updatedPlayer.fame_entries || []);
+      // Usa i dati ritornati dall'update invece di ricaricare
+      if (updated) {
+        setName(updated.name);
+        setAvatar(updated.avatar || '');
+        setDescription(updated.description || '');
+        setSkill(updated.skill || '');
+        setLack(updated.lack || '');
+        setHand(updated.hand || 'Destra');
+        setShot(updated.shot || 'Dritto');
+        setFameEntries(updated.fame_entries || []);
       }
       
+      // Aspetta un momento prima di ricaricare per evitare race conditions
+      await new Promise(resolve => setTimeout(resolve, 100));
       onUpdate();
     } catch (error) {
+      console.error('Errore salvataggio:', error);
       toast({
         title: 'Errore',
         description: 'Impossibile salvare le modifiche',
