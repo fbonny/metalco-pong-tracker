@@ -162,75 +162,88 @@ export function calculateMatchPoints(winnerScore: number, loserScore: number): {
   return { winner: 10 + bonus, loser: 0 };
 }
 
-// Recalculate all player stats from matches
+// Recalculate all player stats from matches (only last 20 matches per player)
 export async function recalculateAllStats(): Promise<void> {
   const [players, matches] = await Promise.all([getPlayers(), getMatches()]);
   
-  // Initialize player stats
-  const playerStats: Record<string, { wins: number; losses: number; points: number; history: string[] }> = {};
-  players.forEach(p => {
-    playerStats[p.name] = { wins: 0, losses: 0, points: 0, history: [] };
-  });
-  
-  // Process matches in chronological order
+  // Process matches in chronological order (oldest first)
   const sortedMatches = [...matches].sort((a, b) => 
     new Date(a.played_at).getTime() - new Date(b.played_at).getTime()
   );
   
-  sortedMatches.forEach(match => {
-    const winner = match.score1 > match.score2;
-    const winnerTeam = winner ? match.team1 : match.team2;
-    const loserTeam = winner ? match.team2 : match.team1;
-    const winnerScore = winner ? match.score1 : match.score2;
-    const loserScore = winner ? match.score2 : match.score1;
+  // Calculate stats for each player based on their last 20 matches
+  const updatedPlayers = players.map(player => {
+    // Find all matches where this player participated
+    const playerMatches = sortedMatches.filter(match => 
+      match.team1.includes(player.name) || match.team2.includes(player.name)
+    );
     
-    const pts = calculateMatchPoints(winnerScore, loserScore);
+    // Take only the last 20 matches for this player
+    const last20Matches = playerMatches.slice(-20);
     
-    winnerTeam.forEach(name => {
-      if (playerStats[name]) {
-        playerStats[name].wins++;
-        playerStats[name].points += pts.winner;
-        playerStats[name].history.push('W');
+    // Initialize stats
+    let wins = 0;
+    let losses = 0;
+    let points = 0;
+    const history: string[] = [];
+    
+    // Calculate stats from the last 20 matches
+    last20Matches.forEach(match => {
+      const isTeam1 = match.team1.includes(player.name);
+      const isTeam2 = match.team2.includes(player.name);
+      
+      if (!isTeam1 && !isTeam2) return;
+      
+      const winner = match.score1 > match.score2;
+      const playerWon = (isTeam1 && winner) || (isTeam2 && !winner);
+      const winnerScore = winner ? match.score1 : match.score2;
+      const loserScore = winner ? match.score2 : match.score1;
+      
+      const pts = calculateMatchPoints(winnerScore, loserScore);
+      
+      if (playerWon) {
+        wins++;
+        points += pts.winner;
+        history.push('W');
+      } else {
+        losses++;
+        points += pts.loser;
+        history.push('L');
       }
     });
     
-    loserTeam.forEach(name => {
-      if (playerStats[name]) {
-        playerStats[name].losses++;
-        playerStats[name].points += pts.loser;
-        playerStats[name].history.push('L');
-      }
-    });
+    return {
+      player,
+      stats: { wins, losses, points, history }
+    };
   });
   
-  // Calculate rankings and best rank
-  const rankedPlayers = Object.entries(playerStats)
-    .map(([name, stats]) => ({ name, ...stats }))
-    .sort((a, b) => b.points - a.points || b.wins - a.wins);
+  // Calculate rankings based on points from last 20 matches
+  const rankedPlayers = [...updatedPlayers]
+    .sort((a, b) => b.stats.points - a.stats.points || b.stats.wins - a.stats.wins);
   
   // Update all players
   await Promise.all(
-    players.map((player, idx) => {
-      const stats = playerStats[player.name];
-      const currentRank = rankedPlayers.findIndex(p => p.name === player.name) + 1;
+    updatedPlayers.map(({ player, stats }) => {
+      const currentRank = rankedPlayers.findIndex(p => p.player.id === player.id) + 1;
       
-      // Calculate best rank: use current if player has no matches OR if current is better than recorded best
+      // Calculate best rank
       let bestRank: number;
       const hasMatches = stats.wins + stats.losses > 0;
       
       if (!hasMatches) {
-        // If no matches, don't set a best_rank (it will be set when they play their first match)
         bestRank = currentRank;
       } else if (player.best_rank) {
-        // If has matches and has a recorded best, use the minimum
         bestRank = Math.min(player.best_rank, currentRank);
       } else {
-        // If has matches but no recorded best, use current rank
         bestRank = currentRank;
       }
       
       return updatePlayer(player.id, {
-        ...stats,
+        wins: stats.wins,
+        losses: stats.losses,
+        points: stats.points,
+        history: stats.history,
         best_rank: bestRank,
         updated_at: new Date().toISOString(),
       });
