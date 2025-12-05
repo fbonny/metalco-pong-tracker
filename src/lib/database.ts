@@ -90,8 +90,6 @@ export async function updatePlayer(id: string, updates: Partial<Player>): Promis
     body: JSON.stringify(updates),
   });
   
-  console.log('updatePlayer response:', response);
-  
   if (!response || response.length === 0) {
     throw new Error('Nessun dato restituito dal database dopo l\'aggiornamento');
   }

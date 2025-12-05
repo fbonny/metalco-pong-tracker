@@ -94,8 +94,6 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
 
     setIsSaving(true);
     try {
-      console.log('🔵 Inizio salvataggio profilo:', { name, skill, lack });
-
       const updated = await updatePlayer(player.id, {
         name: name.trim(),
         avatar,
@@ -108,8 +106,6 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
         updated_at: new Date().toISOString(),
       });
 
-      console.log('🟢 Dati ricevuti dal database:', updated);
-
       toast({
         title: 'Profilo aggiornato',
         description: 'Le modifiche sono state salvate con successo',
@@ -119,7 +115,6 @@ export default function PlayerProfileModal({ player, onClose, onUpdate }: Player
 
       // Usa i dati ritornati dall'update invece di ricaricare
       if (updated) {
-        console.log('✅ Aggiornamento stati locali con:', updated);
         setName(updated.name);
         setAvatar(updated.avatar || '');
         setDescription(updated.description || '');
