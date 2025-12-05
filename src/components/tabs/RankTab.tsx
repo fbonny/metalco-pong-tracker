@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Player, getPlayers } from '@/lib/database';
+import { Player, getPlayers, recalculateAllStats } from '@/lib/database';
 import { formatPoints } from '@/lib/formatUtils';
 import PlayerAvatar from '@/components/PlayerAvatar';
-import { BarChart3, Info, X } from 'lucide-react';
+import { BarChart3, Info, X, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface RankTabProps {
   onPlayerClick: (player: Player) => void;
@@ -12,6 +13,7 @@ interface RankTabProps {
 export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
   const [players, setPlayers] = useState<Player[]>([]);
   const [expandedImage, setExpandedImage] = useState<{ url: string; name: string } | null>(null);
+  const [isRecalculating, setIsRecalculating] = useState(false);
 
   useEffect(() => {
     loadPlayers();
@@ -27,6 +29,24 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
     setPlayers(ranked);
   }
 
+  async function handleRecalculate() {
+    setIsRecalculating(true);
+    try {
+      await recalculateAllStats();
+      await loadPlayers();
+      toast.success('Classifica ricalcolata!', {
+        description: 'I punti sono stati aggiornati con le ultime 20 partite',
+      });
+    } catch (error) {
+      console.error('Errore ricalcolo:', error);
+      toast.error('Errore nel ricalcolo', {
+        description: 'Riprova tra qualche secondo',
+      });
+    } finally {
+      setIsRecalculating(false);
+    }
+  }
+
   const handleAvatarClick = (player: Player) => {
     if (player.avatar) {
       setExpandedImage({ url: player.avatar, name: player.name });
@@ -36,7 +56,17 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
   return (
     <>
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-2xl font-semibold mb-6">🏓 CLASSIFICA 🏓</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold">🏓 CLASSIFICA 🏓</h2>
+          <button
+            onClick={handleRecalculate}
+            disabled={isRecalculating}
+            className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Ricalcola classifica (ultime 20 partite)"
+          >
+            <RefreshCw className={`w-5 h-5 ${isRecalculating ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
         
         <div className="space-y-2">
           {players.map((player, index) => {
