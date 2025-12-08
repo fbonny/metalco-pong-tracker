@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Match, getMatches, deleteMatch, recalculateAllStats, Player, getPlayers } from '@/lib/database';
-import { Trophy, Flame, TrendingUp, TrendingDown, TrendingUpDown, Edit, Trash2, Users, ChevronDown, ChevronRight, Calendar } from 'lucide-react';
+import { generateDailyInsights, DailyInsight } from '@/lib/insightsGenerator';
+import { Trophy, Flame, TrendingUp, TrendingDown, TrendingUpDown, Edit, Trash2, Users, ChevronDown, ChevronRight, Calendar, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StoricoTabProps {
@@ -16,6 +17,9 @@ interface MatchesByDay {
 
 export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProps) {
   const [matches, setMatches] = useState<Match[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [insights, setInsights] = useState<DailyInsight[]>([]);
+  const [showInsights, setShowInsights] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
   const [stats, setStats] = useState({
@@ -27,9 +31,10 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
   }, []);
 
   async function loadMatches() {
-    const data = await getMatches();
-    setMatches(data);
-    setStats({ totalMatches: data.length });
+    const [matchesData, playersData] = await Promise.all([getMatches(), getPlayers()]);
+    setMatches(matchesData);
+    setPlayers(playersData);
+    setStats({ totalMatches: matchesData.length });
   }
 
   async function handleDelete(matchId: string) {
@@ -44,6 +49,24 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
       toast.error('Errore eliminazione partita');
       console.error(error);
     }
+  }
+
+  function handleGenerateInsights() {
+    if (matches.length === 0 || players.length === 0) {
+      toast.error('Nessuna partita disponibile');
+      return;
+    }
+
+    // Generate insights for today
+    const today = new Date();
+    const generatedInsights = generateDailyInsights(matches, players, today);
+    
+    setInsights(generatedInsights);
+    setShowInsights(true);
+    
+    toast.success('Insight generati!', {
+      description: `${generatedInsights.length} insight trovati`,
+    });
   }
 
   const filteredMatches = matches.filter(match => {
@@ -124,6 +147,57 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-semibold mb-6">Storico Partite</h2>
+      
+      {/* Daily Insights Section */}
+      <div className="mb-6 border-2 border-foreground p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-gold" />
+            <h3 className="text-lg font-semibold">Insight del Giorno</h3>
+          </div>
+          <button
+            onClick={handleGenerateInsights}
+            className="px-4 py-2 bg-foreground text-background border-2 border-foreground font-semibold hover:bg-background hover:text-foreground transition-colors flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            Genera Insight
+          </button>
+        </div>
+
+        {showInsights && insights.length > 0 ? (
+          <div className="space-y-3">
+            {insights.map((insight, index) => {
+              const bgColor = 
+                insight.type === 'streak' && insight.emoji === '🔥' ? 'bg-orange-500/10 border-orange-500' :
+                insight.type === 'streak' && insight.emoji === '❄️' ? 'bg-blue-500/10 border-blue-500' :
+                insight.type === 'battle' ? 'bg-purple-500/10 border-purple-500' :
+                insight.type === 'record' ? 'bg-red-500/10 border-red-500' :
+                insight.type === 'doubles' ? 'bg-green-500/10 border-green-500' :
+                'bg-muted border-foreground';
+
+              return (
+                <div
+                  key={index}
+                  className={`p-4 border-2 ${bgColor} rounded-sm animate-fade-in`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl flex-shrink-0">{insight.emoji}</span>
+                    <p className="text-sm font-medium flex-1">{insight.text}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : showInsights && insights.length === 0 ? (
+          <div className="text-center text-muted-foreground py-4 border-2 border-dashed border-foreground">
+            <p className="text-sm">Nessuna partita giocata oggi. Silenzio assoluto! 🦗</p>
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground py-4 border-2 border-dashed border-foreground">
+            <p className="text-sm">Clicca "Genera Insight" per analizzare le partite di oggi! 🎲</p>
+          </div>
+        )}
+      </div>
       
       {/* Stats Cards - 3x3 Grid */}
       <div className="grid grid-cols-3 gap-3 mb-6">
