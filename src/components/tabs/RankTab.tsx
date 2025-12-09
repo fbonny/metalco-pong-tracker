@@ -73,7 +73,6 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
             const rank = index + 1;
             const isLeader = rank === 1;
             
-            // Calculate wins/losses from last 20 matches for ranking display ONLY
             const last20History = player.history.slice(-20);
             const last20Wins = last20History.filter(r => r === 'W').length;
             const last20Losses = last20History.filter(r => r === 'L').length;
@@ -81,9 +80,8 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
             return (
               <div
                 key={player.id}
-                className={`w-full border-2 ${\n                  isLeader ? 'border-gold bg-gold/10 leader-glow' : 'border-foreground'\n                }`}
+                className={`w-full border-2 ${isLeader ? 'border-gold bg-gold/10 leader-glow' : 'border-foreground'}`}
               >
-                {/* Prima Riga: Rank, Avatar, Nome/Stats, Punti, Bottoni */}
                 <div className="flex items-center gap-2 sm:gap-4 p-3 sm:p-4">
                   <div className={`text-xl sm:text-2xl font-bold w-8 sm:w-12 text-center flex-shrink-0 ${isLeader ? 'text-gold' : ''}`}>
                     {rank}
@@ -138,7 +136,6 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
                   </button>
                 </div>
 
-                {/* Seconda Riga: Pallini che occupano tutta la larghezza */}
                 {last20History.length > 0 && (
                   <div className="px-3 pb-3 sm:px-4 sm:pb-4">
                     <div className="flex gap-1 overflow-x-auto scrollbar-hide">
@@ -158,7 +155,6 @@ export default function RankTab({ onPlayerClick, onStatsClick }: RankTabProps) {
         </div>
       </div>
 
-      {/* Image Lightbox */}
       {expandedImage && (
         <div 
           className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
