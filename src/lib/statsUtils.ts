@@ -467,6 +467,8 @@ export function calculateAdvancedStats(
   // Get teammates with max matches
   const maxMatches = allTeammateStats.length > 0 ? allTeammateStats[0].matchesPlayed : 0;
   const favoriteTeammates = allTeammateStats.filter(t => t.matchesPlayed === maxMatches && maxMatches > 0);
+  // Calculate average teammate rank
+  const averageTeammateRank = calculateAverageTeammateRank(playerName, matches, allPlayers);
 
   return {
     nemesis,
