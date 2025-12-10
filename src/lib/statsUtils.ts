@@ -333,6 +333,67 @@ function getPlayerMatchups(playerName: string, matches: Match[], allPlayers: str
 /**
  * Calculate advanced statistics for a player
  */
+
+/**
+ * Calculate the average rank of teammates a player has played with in doubles
+ * Uses historical rank snapshots from when matches were played
+ */
+export function calculateAverageTeammateRank(
+  playerName: string,
+  matches: Match[],
+  allPlayers: Player[]
+): number | null {
+  // Create a current ranking map as fallback
+  const rankedPlayers = [...allPlayers].sort((a, b) => {
+    const pointsA = typeof a.points === 'string' ? parseFloat(a.points) : a.points;
+    const pointsB = typeof b.points === 'string' ? parseFloat(b.points) : b.points;
+    return pointsB - pointsA || b.wins - a.wins;
+  });
+
+  const currentRankMap: Record<string, number> = {};
+  rankedPlayers.forEach((player, index) => {
+    currentRankMap[player.name] = index + 1;
+  });
+
+  // Find all doubles matches where the player participated
+  const doublesMatches = matches.filter(match => {
+    if (!match.is_double) return false;
+    return match.team1.includes(playerName) || match.team2.includes(playerName);
+  });
+
+  if (doublesMatches.length === 0) {
+    return null;
+  }
+
+  // Collect all teammate ranks (using historical data when available)
+  const teammateRanks: number[] = [];
+
+  doublesMatches.forEach(match => {
+    const playerTeam = match.team1.includes(playerName) ? match.team1 : match.team2;
+    const teammates = playerTeam.filter(name => name !== playerName);
+    
+    teammates.forEach(teammate => {
+      let rank: number | undefined;
+      
+      if (match.player_ranks && match.player_ranks[teammate]) {
+        rank = match.player_ranks[teammate];
+      } else {
+        rank = currentRankMap[teammate];
+      }
+      
+      if (rank !== undefined) {
+        teammateRanks.push(rank);
+      }
+    });
+  });
+
+  if (teammateRanks.length === 0) {
+    return null;
+  }
+
+  const sum = teammateRanks.reduce((acc, rank) => acc + rank, 0);
+  return sum / teammateRanks.length;
+}
 export function calculateAdvancedStats(
   player: Player,
   matches: Match[],
