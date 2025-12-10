@@ -125,6 +125,41 @@ export default function PlayerStatsModal({ player, onClose }: PlayerStatsModalPr
                 </div>
               )}
 
+              {/* Average Teammate Rank */}
+              {advancedStats.averageTeammateRank !== null && advancedStats.doppioMatches > 0 && (
+                <div className="p-4 border-2 border-purple-600 bg-purple-600/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="w-4 h-4 text-purple-600" />
+                    <span className="text-sm font-semibold text-purple-600">RANKING MEDIO COMPAGNI</span>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-purple-600">
+                      #{advancedStats.averageTeammateRank.toFixed(1)}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Calcolato su {advancedStats.doppioMatches} {advancedStats.doppioMatches === 1 ? 'doppio giocato' : 'doppi giocati'}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {advancedStats.averageTeammateRank < currentRank && (
+                        <span className="text-green-600 font-semibold">
+                          ✅ Compagni più forti (rank {advancedStats.averageTeammateRank.toFixed(1)} vs {currentRank})
+                        </span>
+                      )}
+                      {advancedStats.averageTeammateRank > currentRank && (
+                        <span className="text-amber-600 font-semibold">
+                          ⚠️ Compagni più deboli (rank {advancedStats.averageTeammateRank.toFixed(1)} vs {currentRank})
+                        </span>
+                      )}
+                      {Math.abs(advancedStats.averageTeammateRank - currentRank) < 0.5 && (
+                        <span className="text-blue-600 font-semibold">
+                          ⚖️ Livello simile (rank {advancedStats.averageTeammateRank.toFixed(1)} vs {currentRank})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="p-4 border-2 border-foreground">
                 <div className="flex items-center gap-2 mb-3">
                   <TrendingUp className="w-4 h-4" />
