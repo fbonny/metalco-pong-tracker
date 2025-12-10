@@ -480,6 +480,7 @@ export function calculateAdvancedStats(
     singoloMatches: singoloMatches.length,
     doppioMatches: doppioMatches.length,
     balancedRivalries,
+    averageTeammateRank,
   };
 }
 
