@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Match, getMatches, deleteMatch, recalculateAllStats, Player, getPlayers } from '@/lib/database';
 import { generateDailyInsights, DailyInsight } from '@/lib/insightsGenerator';
-import { Trophy, Flame, TrendingUp, TrendingDown, TrendingUpDown, Edit, Trash2, Users, ChevronDown, ChevronRight, Calendar, Sparkles } from 'lucide-react';
+import { populateHistoricalRanks } from '@/lib/populateRanks';
+import { Trophy, Flame, TrendingUp, TrendingDown, TrendingUpDown, Edit, Trash2, Users, ChevronDown, ChevronRight, Calendar, Sparkles, Database } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StoricoTabProps {
@@ -22,6 +23,7 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
   const [showInsights, setShowInsights] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
+  const [isPopulatingRanks, setIsPopulatingRanks] = useState(false);
   const [stats, setStats] = useState({
     totalMatches: 0,
   });
@@ -67,6 +69,30 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
     toast.success('Insight generati!', {
       description: `${generatedInsights.length} insight trovati`,
     });
+  }
+
+  async function handlePopulateHistoricalRanks() {
+    if (!confirm('Popolare i ranking storici per le partite vecchie?\n\nQuesto aggiornerà tutte le partite che non hanno ranking salvati.\nPuò richiedere qualche secondo.')) {
+      return;
+    }
+
+    setIsPopulatingRanks(true);
+    
+    try {
+      await populateHistoricalRanks();
+      await loadMatches();
+      toast.success('Ranking storici popolati!', {
+        description: 'Tutte le partite hanno ora i ranking salvati',
+        duration: 5000,
+      });
+    } catch (error) {
+      console.error('Errore popolazione ranking:', error);
+      toast.error('Errore durante la popolazione', {
+        description: 'Controlla la console per i dettagli',
+      });
+    } finally {
+      setIsPopulatingRanks(false);
+    }
   }
 
   const filteredMatches = matches.filter(match => {
@@ -146,8 +172,20 @@ export default function StoricoTab({ onEditMatch, onStatsClick }: StoricoTabProp
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Storico Partite</h2>
       
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Storico Partite</h2>
+        
+        <button
+          onClick={handlePopulateHistoricalRanks}
+          disabled={isPopulatingRanks}
+          className="px-3 py-2 text-xs border-2 border-muted-foreground text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          title="Popola ranking storici per partite vecchie"
+        >
+          <Database className={`w-4 h-4 ${isPopulatingRanks ? 'animate-pulse' : ''}`} />
+          {isPopulatingRanks ? 'Popolando...' : 'Popola Ranking Storici'}
+        </button>
+      </div>
       {/* Daily Insights Section */}
       <div className="mb-6 border-2 border-foreground p-4">
         <div className="flex items-center justify-between mb-4">
